@@ -7,8 +7,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-24.04
-    container: ghcr.io/mopidy/ci:latest
+    runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/project/mopidy-marceline/
@@ -26,8 +25,6 @@ jobs:
           cache: pnpm
       - name: Install node dependencies
         run: pnpm install --frozen-lockfile
-      - name: Fix home dir permissions to enable pip caching
-        run: chown -R root /github/home
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
