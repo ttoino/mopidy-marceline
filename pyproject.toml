@@ -30,10 +30,12 @@ build-backend = "setuptools.build_meta"
 [dependency-groups]
 dev = [
     "tox",
+    { include-group = "build" },
     { include-group = "ruff" },
     { include-group = "tests" },
     { include-group = "typing" },
 ]
+build = ["build"]
 ruff = ["ruff"]
 tests = ["pytest", "pytest-cov"]
 typing = ["pyright"]
@@ -105,11 +107,15 @@ packages = ["mopidy_marceline"]
 
 
 [tool.tox]
-env_list = ["format", "lint", "test", "typecheck"]
+env_list = ["build", "format", "lint", "test", "typecheck"]
 
 [tool.tox.env_run_base]
 package = "wheel"
 wheel_build_env = ".pkg"
+
+[tool.tox.env.build]
+dependency_groups = ["build"]
+commands = [["python", "-m", "build", "--wheel", "--sdist"]]
 
 [tool.tox.env.format]
 skip_install = true
