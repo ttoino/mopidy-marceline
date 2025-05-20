@@ -3,7 +3,6 @@
     import type MopidyState from "$lib/state/mopidy.svelte";
     import { getContext } from "svelte";
 
-    import Lyrics from "$lib/components/Lyrics.svelte";
     import QueueActions from "$lib/components/QueueActions.svelte";
 
     let mopidy = getContext("mopidy") as MopidyState;

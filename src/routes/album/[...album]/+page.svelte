@@ -4,7 +4,6 @@
     import TrackListActions from "$lib/components/TrackListActions.svelte";
     import type MopidyState from "$lib/state/mopidy.svelte.js";
     import { getContext } from "svelte";
-    import { Button, IconButton } from "svelte-m3c";
 
     let { data } = $props();
 

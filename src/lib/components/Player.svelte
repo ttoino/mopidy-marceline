@@ -33,7 +33,7 @@
                     {mopidy.currentTrack.track.name}
                 </a>
                 <span class="truncate text-title-s text-outline">
-                    {#each mopidy.currentTrack.track.artists as artist}
+                    {#each mopidy.currentTrack.track.artists as artist (artist.uri)}
                         <span class="not-last:after:content-[',_']">
                             {artist.name}
                         </span>

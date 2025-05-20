@@ -5,7 +5,6 @@
         Button,
         IconButton,
         Menu,
-        MenuItem,
         MenuList,
         MenuTrigger,
     } from "svelte-m3c";
