@@ -1,5 +1,5 @@
 [project]
-name = "mopidy-marceline"
+name = "Mopidy-Marceline"
 description = "Mopidy extension with stylish frontend for controlling playback and browsing"
 version = "0.0.1"
 readme = "README.md"

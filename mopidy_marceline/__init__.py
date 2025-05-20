@@ -7,7 +7,7 @@ import mopidy.core
 import mopidy.ext
 import tornado.web
 
-__version__ = version("mopidy-marceline")
+__version__ = version("Mopidy-Marceline")
 __folder__ = pathlib.Path(__file__).parent
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ def marceline_factory(
 
 
 class Extension(mopidy.ext.Extension):
-    dist_name = "mopidy-marceline"
+    dist_name = "Mopidy-Marceline"
     ext_name = "marceline"
     version = __version__
 
