@@ -1,29 +1,29 @@
 [project]
 name = "Mopidy-Marceline"
 description = "Mopidy extension with stylish frontend for controlling playback and browsing"
-version = "0.0.1"
+version = "0.0.2"
 readme = "README.md"
 requires-python = ">= 3.11"
-license = { text = "Apache-2.0" }
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 authors = [{ name = "João Pereira", email = "me@toino.pt" }]
 classifiers = [
     "Environment :: No Input/Output (Daemon)",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Topic :: Multimedia :: Sound/Audio :: Players",
 ]
 dependencies = ["mopidy >= 3.4.1", "pykka >= 3.1.1"]
 
 [project.urls]
-Homepage = "https://github.com/ttoino/mopidy-marceline"
+Repository = "https://github.com/ttoino/mopidy-marceline"
 
 [project.entry-points."mopidy.ext"]
 marceline = "mopidy_marceline:Extension"
 
 
 [build-system]
-requires = ["setuptools >= 66", "setuptools-scm >= 7.1"]
+requires = ["setuptools >= 66"]
 build-backend = "setuptools.build_meta"
 
 
@@ -99,11 +99,7 @@ ignore = [
 packages = ["mopidy_marceline"]
 
 [tool.setuptools.package-data]
-"*" = ["*.conf"]
-
-
-[tool.setuptools_scm]
-# This section, even if empty, must be present for setuptools_scm to work
+"*" = ["*.conf", "static/**"]
 
 
 [tool.tox]
