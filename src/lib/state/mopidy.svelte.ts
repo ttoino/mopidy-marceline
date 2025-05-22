@@ -39,6 +39,52 @@ class MopidyState {
         }
     }
 
+    #previousTrack: TlTrack | null = null;
+    get previousTrack() {
+        return this.#previousTrack;
+    }
+    async #updatePreviousTrack() {
+        if (!this.base.tracklist) return;
+
+        try {
+            const tlid = await this.base.tracklist.getPreviousTlid();
+
+            if (tlid === null) {
+                this.#previousTrack = null;
+                return;
+            }
+
+            this.#previousTrack =
+                this.queue.find((track) => track.tlid === tlid) ?? null;
+        } catch (e: unknown) {
+            console.error("Failed to get previous track");
+            console.error(e);
+        }
+    }
+
+    #nextTrack = $state<TlTrack | null>(null);
+    get nextTrack() {
+        return this.#nextTrack;
+    }
+    async #updateNextTrack() {
+        if (!this.base.tracklist) return;
+
+        try {
+            const tlid = await this.base.tracklist.getNextTlid();
+
+            if (tlid === null) {
+                this.#nextTrack = null;
+                return;
+            }
+
+            this.#nextTrack =
+                this.queue.find((track) => track.tlid === tlid) ?? null;
+        } catch (e: unknown) {
+            console.error("Failed to get next track");
+            console.error(e);
+        }
+    }
+
     #consume = $state(false);
     get consume() {
         return this.#consume;
@@ -155,7 +201,13 @@ class MopidyState {
     }
     set timePosition(timePosition: number | null) {
         if (timePosition !== null)
-            void this.base.playback?.seek({ time_position: timePosition });
+            void this.base.playback
+                ?.seek({ time_position: timePosition })
+                .then(() => void this.#updateTimePosition())
+                .catch((e: unknown) => {
+                    console.error("Failed to set time position");
+                    console.error(e);
+                });
     }
     async #updateTimePosition() {
         if (!this.base.playback) return;
@@ -512,6 +564,8 @@ class MopidyState {
         });
         this.base.on("event:trackPlaybackStarted", ({ tl_track }) => {
             void this.#setCurrentTrack(tl_track as TlTrack);
+            void this.#updatePreviousTrack();
+            void this.#updateNextTrack();
             this.#timePosition = 0;
         });
         this.base.on("event:trackPlaybackEnded", () => {
@@ -551,6 +605,8 @@ class MopidyState {
                 Promise.allSettled([
                     // Tracklist
                     this.#updateQueue(),
+                    this.#updatePreviousTrack(),
+                    this.#updateNextTrack(),
                     this.#updateConsume(),
                     this.#updateShuffle(),
                     this.#updateRepeat(),

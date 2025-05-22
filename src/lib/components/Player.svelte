@@ -1,10 +1,18 @@
 <script lang="ts">
-    import { IconButton, ToggleIconButton, Slider } from "svelte-m3c";
+    import {
+        IconButton,
+        ToggleIconButton,
+        Slider,
+        TooltipRoot,
+        TooltipTrigger,
+        Tooltip,
+    } from "svelte-m3c";
     import { slide } from "svelte/transition";
     import { getContext } from "svelte";
     import type MopidyState from "$lib/state/mopidy.svelte";
     import { formatDuration } from "$lib/format";
-    import { base } from "$app/paths";
+    import TrackInfo from "./TrackInfo.svelte";
+    import { mergeProps } from "bits-ui";
 
     let mopidy = getContext("mopidy") as MopidyState;
 </script>
@@ -15,39 +23,26 @@
     style={mopidy.currentTrackPalette}
 >
     {#if mopidy.currentTrack}
-        <div class="flex h-full flex-row items-center gap-4">
-            {#if mopidy.currentTrackImage}
-                <img
-                    src={mopidy.currentTrackImage}
-                    alt="Album cover"
-                    class="aspect-square h-full rounded-md object-cover"
-                />
-            {/if}
-            <div class="flex max-w-40 flex-col first:pl-2">
-                <a
-                    class="truncate !text-title-m hover:underline"
-                    href="{base}/track/{encodeURIComponent(
-                        mopidy.currentTrack.track.uri,
-                    )}"
-                >
-                    {mopidy.currentTrack.track.name}
-                </a>
-                <span class="truncate text-title-s text-outline">
-                    {#each mopidy.currentTrack.track.artists as artist (artist.uri)}
-                        <span class="not-last:after:content-[',_']">
-                            {artist.name}
-                        </span>
-                    {/each}
-                </span>
-            </div>
-        </div>
+        <TrackInfo track={mopidy.currentTrack.track} />
 
         <div class="flex flex-row gap-2">
-            <IconButton
-                icon="skip_previous"
-                tooltip="Previous"
-                onclick={() => mopidy.skipPrevious()}
-            />
+            <TooltipRoot>
+                <TooltipTrigger>
+                    {#snippet child({ props })}
+                        <IconButton
+                            icon="skip_previous"
+                            {...mergeProps(props, {
+                                onclick: () => mopidy.skipPrevious(),
+                            })}
+                        />
+                    {/snippet}
+                </TooltipTrigger>
+                {#if mopidy.previousTrack}
+                    <Tooltip class="rounded-lg p-2">
+                        <TrackInfo track={mopidy.previousTrack.track} />
+                    </Tooltip>
+                {/if}
+            </TooltipRoot>
             <IconButton
                 variant="filled"
                 icon={mopidy.playbackState === "playing"
@@ -60,11 +55,23 @@
                     mopidy.togglePlaybackState();
                 }}
             />
-            <IconButton
-                icon="skip_next"
-                tooltip="Next"
-                onclick={() => mopidy.skipNext()}
-            />
+            <TooltipRoot>
+                <TooltipTrigger>
+                    {#snippet child({ props })}
+                        <IconButton
+                            icon="skip_next"
+                            {...mergeProps(props, {
+                                onclick: () => mopidy.skipNext(),
+                            })}
+                        />
+                    {/snippet}
+                </TooltipTrigger>
+                {#if mopidy.nextTrack}
+                    <Tooltip class="rounded-lg p-2">
+                        <TrackInfo track={mopidy.nextTrack.track} />
+                    </Tooltip>
+                {/if}
+            </TooltipRoot>
         </div>
 
         {#if mopidy.timePosition}
@@ -79,7 +86,7 @@
                     max={mopidy.currentTrack.track.length / 1000}
                     value={(mopidy.timePosition ?? 0) / 1000}
                     onValueCommit={(timePosition: number) => {
-                        mopidy.timePosition = timePosition / 1000;
+                        mopidy.timePosition = timePosition * 1000;
                     }}
                 />
                 <span class="text-label-s">
