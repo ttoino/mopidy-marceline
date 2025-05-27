@@ -1,10 +1,8 @@
 <script lang="ts">
-    import { base } from "$app/paths";
-    import type MopidyState from "$lib/state/mopidy.svelte";
     import type { Track } from "$lib/types/mopidy";
-    import { getContext } from "svelte";
 
-    let mopidy = getContext("mopidy") as MopidyState;
+    import { base } from "$app/paths";
+    import { getMopidy } from "$lib/context/mopidy";
 
     let {
         track,
@@ -12,22 +10,21 @@
         track: Track;
     } = $props();
 
+    const mopidy = getMopidy();
+
     let image = $derived(mopidy.getImage(track.uri));
-    let palette = $derived(image ? mopidy.getPallete(image) : undefined);
 
     $effect(() => {
-        mopidy.requestImages([track.uri]).then((images) => {
-            if (images && images[0]) mopidy.requestPalette(images[0]);
-        });
+        mopidy.requestImages([track.uri]);
     });
 </script>
 
-<div class="flex h-16 flex-row items-center gap-4 palette" style={palette}>
+<div class="flex h-16 flex-row items-center gap-4">
     {#if image}
         <img
-            src={image}
-            alt="Album cover"
             class="aspect-square h-full rounded-md object-cover"
+            alt="Album cover"
+            src={image}
         />
     {/if}
     <div class="flex w-40 flex-col first:pl-2">

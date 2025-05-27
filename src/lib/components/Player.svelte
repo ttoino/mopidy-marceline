@@ -1,26 +1,27 @@
 <script lang="ts">
+    import { getMopidy } from "$lib/context/mopidy";
+    import { formatDuration } from "$lib/format";
+    import { mergeProps, Popover } from "bits-ui";
     import {
         IconButton,
-        ToggleIconButton,
         Slider,
+        ToggleIconButton,
+        Tooltip,
         TooltipRoot,
         TooltipTrigger,
-        Tooltip,
     } from "svelte-m3c";
     import { slide } from "svelte/transition";
-    import { getContext } from "svelte";
-    import type MopidyState from "$lib/state/mopidy.svelte";
-    import { formatDuration } from "$lib/format";
-    import TrackInfo from "./TrackInfo.svelte";
-    import { mergeProps } from "bits-ui";
 
-    let mopidy = getContext("mopidy") as MopidyState;
+    import TrackInfo from "./TrackInfo.svelte";
+    import TrackPreview from "./TrackPreview.svelte";
+
+    const mopidy = getMopidy();
 </script>
 
 <aside
-    transition:slide={{ axis: "y" }}
-    class="fixed right-0 bottom-0 left-0 z-50 flex h-20 flex-row items-center gap-8 rounded-t-lg bg-surface-container p-2 text-on-surface-variant palette"
     style={mopidy.currentTrackPalette}
+    class="fixed right-0 bottom-0 left-0 z-50 flex h-20 flex-row items-center gap-8 rounded-t-lg bg-surface-container p-2 text-on-surface-variant palette"
+    transition:slide={{ axis: "y" }}
 >
     {#if mopidy.currentTrack}
         <TrackInfo track={mopidy.currentTrack.track} />
@@ -38,22 +39,20 @@
                     {/snippet}
                 </TooltipTrigger>
                 {#if mopidy.previousTrack}
-                    <Tooltip class="rounded-lg p-2">
-                        <TrackInfo track={mopidy.previousTrack.track} />
-                    </Tooltip>
+                    <TrackPreview track={mopidy.previousTrack.track} />
+                {:else}
+                    <Tooltip>Previous track</Tooltip>
                 {/if}
             </TooltipRoot>
             <IconButton
-                variant="filled"
                 icon={mopidy.playbackState === "playing"
                     ? "pause"
                     : "play_arrow"}
+                onclick={() => mopidy.togglePlaybackState()}
                 tooltip={mopidy.playbackState === "playing"
                     ? "Pause"
                     : "Resume"}
-                onclick={() => {
-                    mopidy.togglePlaybackState();
-                }}
+                variant="filled"
             />
             <TooltipRoot>
                 <TooltipTrigger>
@@ -67,27 +66,27 @@
                     {/snippet}
                 </TooltipTrigger>
                 {#if mopidy.nextTrack}
-                    <Tooltip class="rounded-lg p-2">
-                        <TrackInfo track={mopidy.nextTrack.track} />
-                    </Tooltip>
+                    <TrackPreview track={mopidy.nextTrack.track} />
+                {:else}
+                    <Tooltip>Next track</Tooltip>
                 {/if}
             </TooltipRoot>
         </div>
 
-        {#if mopidy.timePosition}
+        {#if mopidy.timePosition !== null}
             <div class="flex flex-1 flex-row items-center gap-2">
                 <span class="text-label-s">
                     {formatDuration(mopidy.timePosition)}
                 </span>
                 <Slider
                     class="!min-w-auto grow"
-                    type="single"
                     collapsible
                     max={mopidy.currentTrack.track.length / 1000}
-                    value={(mopidy.timePosition ?? 0) / 1000}
                     onValueCommit={(timePosition: number) => {
                         mopidy.timePosition = timePosition * 1000;
                     }}
+                    type="single"
+                    value={mopidy.timePosition / 1000}
                 />
                 <span class="text-label-s">
                     {formatDuration(mopidy.currentTrack.track.length)}
@@ -116,15 +115,33 @@
             title="Repeat"
             bind:pressed={mopidy.repeat}
         />
-        <IconButton
-            icon={mopidy.mute
-                ? "no_sound"
-                : mopidy.volume > 75
-                  ? "volume_up"
-                  : mopidy.volume > 25
-                    ? "volume_down"
-                    : "volume_mute"}
-        />
+
+        <!-- TODO -->
+        <Popover.Root>
+            <Popover.Trigger>
+                {#snippet child({ props })}
+                    <IconButton
+                        icon={mopidy.mute
+                            ? "no_sound"
+                            : mopidy.volume > 75
+                              ? "volume_up"
+                              : mopidy.volume > 25
+                                ? "volume_down"
+                                : "volume_mute"}
+                        {...props}
+                    />
+                {/snippet}
+            </Popover.Trigger>
+            <Popover.Content
+                class="rounded-full bg-surface-container px-2 py-5.5 text-on-surface-variant shadow-2"
+            >
+                <Slider
+                    orientation="vertical"
+                    type="single"
+                    bind:value={mopidy.volume}
+                />
+            </Popover.Content>
+        </Popover.Root>
 
         <!-- <Slider
                 class="!min-w-16"

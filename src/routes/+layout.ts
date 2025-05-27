@@ -1,4 +1,5 @@
 import MopidyState from "$lib/state/mopidy.svelte";
+
 import type { LayoutLoad } from "./$types";
 
 export const ssr = false;

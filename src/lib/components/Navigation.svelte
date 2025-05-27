@@ -1,47 +1,47 @@
-<script module lang="ts">
+<script lang="ts" module>
     import type { ComponentProps } from "svelte";
     import type { Icon } from "svelte-m3c";
 
     const destinations = [
         {
-            label: "Queue",
-            icon: "playlist_play",
             href: "/",
+            icon: "playlist_play",
+            label: "Queue",
         },
         {
-            label: "Library",
-            icon: "folder",
             href: "/library",
+            icon: "folder",
+            label: "Library",
         },
         {
-            label: "Artists",
-            icon: "artist",
             href: "/artist",
+            icon: "artist",
+            label: "Artists",
         },
         {
-            label: "Albums",
-            icon: "album",
             href: "/album",
+            icon: "album",
+            label: "Albums",
         },
         {
-            label: "Tracks",
-            icon: "music_note",
             href: "/track",
+            icon: "music_note",
+            label: "Tracks",
         },
         {
-            label: "Playlists",
-            icon: "queue_music",
             href: "/playlist",
+            icon: "queue_music",
+            label: "Playlists",
         },
         {
-            label: "History",
-            icon: "history",
             href: "/history",
+            icon: "history",
+            label: "History",
         },
     ] as const satisfies {
-        label: string;
-        icon: ComponentProps<typeof Icon>["icon"];
         href: string;
+        icon: ComponentProps<typeof Icon>["icon"];
+        label: string;
     }[];
 </script>
 
@@ -63,11 +63,11 @@
 </script>
 
 <NavigationDrawer class="max-large:hidden">
-    {#each destinations as { label, icon, href }, index (index)}
+    {#each destinations as { href, icon, label }, index (index)}
         <NavigationDrawerItem
-            {icon}
-            href="{base}{href}"
             active={index === active}
+            href="{base}{href}"
+            {icon}
         >
             {label}
         </NavigationDrawerItem>
@@ -75,11 +75,11 @@
 </NavigationDrawer>
 
 <NavigationRail class="py-8 max-medium:hidden large:hidden">
-    {#each destinations as { label, icon, href }, index (index)}
+    {#each destinations as { href, icon, label }, index (index)}
         <NavigationRailItem
-            {icon}
-            href="{base}{href}"
             active={index === active}
+            href="{base}{href}"
+            {icon}
         >
             {label}
         </NavigationRailItem>

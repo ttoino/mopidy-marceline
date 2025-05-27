@@ -1,10 +1,10 @@
 export type LRCLibResponse = {
-    id: number;
-    trackName: string;
-    artistName: string;
     albumName: string;
+    artistName: string;
     duration: number;
+    id: number;
     instrumental: boolean;
     plainLyrics: string;
     syncedLyrics: string;
+    trackName: string;
 };

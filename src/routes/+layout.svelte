@@ -1,35 +1,37 @@
 <script lang="ts">
-    import Player from "$lib/components/Player.svelte";
-    import { Provider, ScrollArea } from "svelte-m3c";
-    import "../app.css";
     import { page } from "$app/state";
-    import { setContext } from "svelte";
     import Navigation from "$lib/components/Navigation.svelte";
+
+    import "../app.css";
+
+    import Player from "$lib/components/Player.svelte";
     import Search from "$lib/components/Search.svelte";
+    import { setMopidy } from "$lib/context/mopidy";
+    import { Provider, ScrollArea } from "svelte-m3c";
+    import { setScroll } from "$lib/context/scroll";
 
     let { children, data } = $props();
 
     let scrollRef = $state(null);
-    setContext("scroll", () => scrollRef);
+    setScroll(() => scrollRef);
 
-    let mopidy = $state(data.mopidy);
-    setContext("mopidy", mopidy);
+    setMopidy(data.mopidy);
 
     let palette = $derived(
-        page.data.palette ?? mopidy.currentTrackPalette ?? "",
+        page.data.palette ?? data.mopidy.currentTrackPalette ?? "",
     );
 </script>
 
 <Provider>
     <div
-        class="flex h-full flex-col bg-surface text-on-surface palette"
         style={palette}
+        class="flex h-full flex-col bg-surface text-on-surface palette"
     >
         <div class="flex h-full flex-row pb-20">
             <Navigation />
             <ScrollArea bind:viewportRef={scrollRef}>
                 <Search />
-                <main class="min-h-full">
+                <main class="min-h-full mx-auto flex flex-col max-w-(--breakpoint-large)">
                     {@render children()}
                 </main>
             </ScrollArea>

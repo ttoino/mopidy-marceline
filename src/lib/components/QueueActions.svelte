@@ -1,24 +1,23 @@
 <script lang="ts">
-    import type MopidyState from "$lib/state/mopidy.svelte";
-    import { getContext } from "svelte";
+    import { getMopidy } from "$lib/context/mopidy";
     import {
         Button,
+        Icon,
         IconButton,
         Menu,
+        MenuItem,
         MenuList,
         MenuTrigger,
     } from "svelte-m3c";
 
-    let mopidy = getContext("mopidy") as MopidyState;
+    const mopidy = getMopidy();
 </script>
 
 <div class="flex flex-row items-center gap-2">
     <Button
-        variant="filled"
         icon="clear"
-        onclick={async () => {
-            await mopidy.base.tracklist?.clear();
-        }}
+        onclick={async () => await mopidy.clearQueue()}
+        variant="filled"
     >
         Clear
     </Button>
@@ -26,9 +25,7 @@
     <Button
         containerClass="max-medium:hidden"
         icon="shuffle"
-        onclick={async () => {
-            await mopidy.base.tracklist?.shuffle({});
-        }}
+        onclick={async () => await mopidy.shuffleQueue()}
     >
         Shuffle
     </Button>
@@ -43,6 +40,15 @@
                 />
             {/snippet}
         </MenuTrigger>
-        <MenuList></MenuList>
+        <MenuList>
+            <MenuItem onSelect={async () => await mopidy.shuffleQueue()}>
+                {#snippet text()}
+                    Shuffle
+                {/snippet}
+                {#snippet leading()}
+                    <Icon icon="shuffle" />
+                {/snippet}
+            </MenuItem>
+        </MenuList>
     </Menu>
 </div>

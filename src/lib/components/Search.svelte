@@ -7,8 +7,8 @@
 >
     <SearchBar class="pointer-events-auto">
         {#snippet leading()}
-            <IconButton icon="menu" containerClass="z-10 medium:hidden -m-2" />
-            <Icon icon="search" class="max-medium:hidden" />
+            <IconButton containerClass="z-10 medium:hidden -m-2" icon="menu" />
+            <Icon class="max-medium:hidden" icon="search" />
         {/snippet}
     </SearchBar>
 </div>

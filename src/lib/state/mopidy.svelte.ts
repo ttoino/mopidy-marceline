@@ -1,76 +1,156 @@
-import { BASE_URL, WS_URL } from "$lib/constants";
 import { themeFromImage } from "@material/material-color-utilities";
+import { BASE_URL, WS_URL } from "$lib/constants";
+import * as lrclib from "$lib/lrclib";
+import { brand } from "$lib/types/brand";
+import {
+    type AlbumURI,
+    type AlbumWithTracks,
+    type AnyTrack,
+    type AnyTracks,
+    type ArtistURI,
+    type ArtistWithAlbums,
+    type Directory,
+    type DirectoryURI,
+    type HistoryEntry,
+    model,
+    models,
+    type ModelURI,
+    type PlaybackState,
+    type Playlist,
+    type PlaylistURI,
+    type TlTrack,
+    type Track,
+    type TrackLyrics,
+    type TrackRef,
+    type TrackURI,
+} from "$lib/types/mopidy";
 import Mopidy from "mopidy";
 import { SvelteMap } from "svelte/reactivity";
-import * as lrclib from "$lib/lrclib";
-import type {
-    Album,
-    AlbumURI,
-    Artist,
-    ArtistURI,
-    ModelURI,
-    PlaybackState,
-    PlaylistURI,
-    TlTrack,
-    Track,
-    TrackLyrics,
-    TrackURI,
-} from "$lib/types/mopidy";
-import { brand } from "$lib/types/brand";
 
 class MopidyState {
-    base: Mopidy;
+    // @sort Tracklist
 
-    // Tracklist
-
-    #queue = $state<TlTrack[]>([]);
-    get queue() {
-        return this.#queue;
-    }
-    async #updateQueue() {
-        if (!this.base.tracklist) return;
-
-        try {
-            this.#queue =
-                (await this.base.tracklist.getTlTracks()) as TlTrack[];
-        } catch (e: unknown) {
-            console.error("Failed to get queue");
-            console.error(e);
-        }
-    }
-
-    #previousTrack: TlTrack | null = null;
-    get previousTrack() {
-        return this.#previousTrack;
-    }
-    async #updatePreviousTrack() {
-        if (!this.base.tracklist) return;
-
-        try {
-            const tlid = await this.base.tracklist.getPreviousTlid();
-
-            if (tlid === null) {
-                this.#previousTrack = null;
-                return;
-            }
-
-            this.#previousTrack =
-                this.queue.find((track) => track.tlid === tlid) ?? null;
-        } catch (e: unknown) {
-            console.error("Failed to get previous track");
-            console.error(e);
-        }
-    }
-
-    #nextTrack = $state<TlTrack | null>(null);
     get nextTrack() {
         return this.#nextTrack;
     }
-    async #updateNextTrack() {
-        if (!this.base.tracklist) return;
+
+    get previousTrack() {
+        return this.#previousTrack;
+    }
+
+    get queue() {
+        return this.#queue;
+    }
+
+    #nextTrack = $state<null | TlTrack>(null);
+
+    #previousTrack: null | TlTrack = null;
+
+    #queue = $state<TlTrack[]>([]);
+
+    async addToQueue(tracks: AnyTrack | AnyTracks) {
+        if (!this.#base.tracklist) return;
 
         try {
-            const tlid = await this.base.tracklist.getNextTlid();
+            await this.#base.tracklist.add(this.#normalizeTracks(tracks));
+        } catch (e: unknown) {
+            console.error("Failed to add tracks to queue");
+            console.error(e);
+        }
+    }
+
+    async clearQueue() {
+        if (!this.#base.tracklist) return;
+
+        try {
+            await this.#base.tracklist.clear();
+        } catch (e: unknown) {
+            console.error("Failed to clear queue");
+            console.error(e);
+        }
+    }
+
+    async playNext(tracks: AnyTrack | AnyTracks) {
+        if (!this.#base.tracklist || !this.#base.playback) return;
+
+        try {
+            await this.#base.tracklist.add({
+                ...this.#normalizeTracks(tracks),
+                at_position: 1,
+            });
+            await this.#base.playback.play({});
+        } catch (e: unknown) {
+            console.error("Failed to play tracks next");
+            console.error(e);
+        }
+    }
+
+    async playNow(tracks: AnyTrack | AnyTracks) {
+        if (!this.#base.tracklist || !this.#base.playback) return;
+
+        try {
+            await this.#base.tracklist.clear();
+            await this.#base.tracklist.add(this.#normalizeTracks(tracks));
+            await this.#base.playback.play({});
+        } catch (e: unknown) {
+            console.error("Failed to play tracks now");
+            console.error(e);
+        }
+    }
+
+    async removeFromQueue(tlid: number) {
+        if (!this.#base.tracklist) return;
+
+        try {
+            await this.#base.tracklist.remove({
+                criteria: {
+                    // @ts-expect-error: Types are wrong
+                    tlid: [tlid],
+                },
+            });
+        } catch (e: unknown) {
+            console.error("Failed to remove track from queue");
+            console.error(e);
+        }
+    }
+
+    async shuffleQueue() {
+        if (!this.#base.tracklist) return;
+
+        try {
+            await this.#base.tracklist.shuffle({});
+        } catch (e: unknown) {
+            console.error("Failed to shuffle queue");
+            console.error(e);
+        }
+    }
+
+    #normalizeTracks(tracks: AnyTrack | AnyTracks) {
+        const trackArray = Array.isArray(tracks)
+            ? tracks
+            : ([tracks] as TlTrack[] | Track[] | TrackURI[]);
+
+        if (trackArray.length < 1) return {};
+
+        if (typeof trackArray[0] === "string")
+            return { uris: trackArray as TrackURI[] };
+
+        if ("uri" in trackArray[0])
+            return { uris: (trackArray as TrackRef[]).map((t) => t.uri) };
+
+        return {
+            tracks:
+                "track" in trackArray[0]
+                    ? (trackArray as TlTrack[]).map((t) => t.track)
+                    : (trackArray as Track[]),
+        };
+    }
+
+    async #updateNextTrack() {
+        if (!this.#base.tracklist) return;
+
+        try {
+            const tlid = await this.#base.tracklist.getNextTlid();
 
             if (tlid === null) {
                 this.#nextTrack = null;
@@ -85,97 +165,144 @@ class MopidyState {
         }
     }
 
-    #consume = $state(false);
+    async #updatePreviousTrack() {
+        if (!this.#base.tracklist) return;
+
+        try {
+            const tlid = await this.#base.tracklist.getPreviousTlid();
+
+            if (tlid === null) {
+                this.#previousTrack = null;
+                return;
+            }
+
+            this.#previousTrack =
+                this.queue.find((track) => track.tlid === tlid) ?? null;
+        } catch (e: unknown) {
+            console.error("Failed to get previous track");
+            console.error(e);
+        }
+    }
+
+    async #updateQueue() {
+        if (!this.#base.tracklist) return;
+
+        try {
+            this.#queue =
+                (await this.#base.tracklist.getTlTracks()) as TlTrack[];
+        } catch (e: unknown) {
+            console.error("Failed to get queue");
+            console.error(e);
+        }
+    }
+
+    // @sort Playback
+
     get consume() {
         return this.#consume;
     }
     set consume(value: boolean) {
-        void this.base.tracklist?.setConsume({ value });
+        void this.#base.tracklist?.setConsume({ value });
     }
-    async #updateConsume() {
-        if (!this.base.tracklist) return;
 
-        try {
-            this.#consume = await this.base.tracklist.getConsume();
-        } catch (e: unknown) {
-            console.error("Failed to get consume");
-            console.error(e);
+    get currentTrack() {
+        return this.#currentTrack;
+    }
+
+    get playbackState() {
+        return this.#playbackState;
+    }
+    set playbackState(playbackState: PlaybackState) {
+        switch (playbackState) {
+            case "paused":
+                void this.#base.playback?.pause();
+                break;
+            case "playing":
+                void this.#base.playback?.resume();
+                break;
+            case "stopped":
+                void this.#base.playback?.stop();
+                break;
+            default:
+                console.error("Unknown playback state");
+                break;
         }
     }
 
-    #shuffle = $state(false);
-    get shuffle() {
-        return this.#shuffle;
-    }
-    set shuffle(value: boolean) {
-        void this.base.tracklist?.setRandom({ value });
-    }
-    async #updateShuffle() {
-        if (!this.base.tracklist) return;
-
-        try {
-            this.#shuffle = await this.base.tracklist.getRandom();
-        } catch (e: unknown) {
-            console.error("Failed to get shuffle");
-            console.error(e);
-        }
-    }
-
-    #repeat = $state(false);
     get repeat() {
         return this.#repeat;
     }
     set repeat(value: boolean) {
-        void this.base.tracklist?.setRepeat({ value });
-    }
-    async #updateRepeat() {
-        if (!this.base.tracklist) return;
-
-        try {
-            this.#repeat = await this.base.tracklist.getRepeat();
-        } catch (e: unknown) {
-            console.error("Failed to get repeat");
-            console.error(e);
-        }
+        void this.#base.tracklist?.setRepeat({ value });
     }
 
-    #single = $state(false);
+    get shuffle() {
+        return this.#shuffle;
+    }
+    set shuffle(value: boolean) {
+        void this.#base.tracklist?.setRandom({ value });
+    }
+
     get single() {
         return this.#single;
     }
     set single(value: boolean) {
-        void this.base.tracklist?.setSingle({ value });
+        void this.#base.tracklist?.setSingle({ value });
     }
-    async #updateSingle() {
-        if (!this.base.tracklist) return;
 
-        try {
-            this.#single = await this.base.tracklist.getSingle();
-        } catch (e: unknown) {
-            console.error("Failed to get single");
-            console.error(e);
+    get timePosition() {
+        return this.#timePosition;
+    }
+    set timePosition(timePosition: null | number) {
+        if (timePosition !== null)
+            void this.#base.playback
+                ?.seek({ time_position: timePosition })
+                .then(() => void this.#updateTimePosition())
+                .catch((e: unknown) => {
+                    console.error("Failed to set time position");
+                    console.error(e);
+                });
+    }
+
+    #consume = $state(false);
+
+    #currentTrack = $state<null | TlTrack>(null);
+
+    #playbackState = $state<PlaybackState>("stopped");
+
+    #repeat = $state(false);
+
+    #shuffle = $state(false);
+
+    #single = $state(false);
+
+    #timePosition = $state<null | number>(null);
+
+    skipNext() {
+        void this.#base.playback?.next();
+    }
+
+    skipPrevious() {
+        void this.#base.playback?.previous();
+    }
+
+    togglePlaybackState() {
+        switch (this.playbackState) {
+            case "paused":
+                this.playbackState = "playing";
+                break;
+            case "playing":
+                this.playbackState = "paused";
+                break;
+            case "stopped":
+                break;
+            default:
+                console.error("Unknown playback state");
+                break;
         }
     }
 
-    // Playback
-
-    #currentTrack = $state<TlTrack | null>(null);
-    get currentTrack() {
-        return this.#currentTrack;
-    }
-    async #updateCurrentTrack() {
-        if (!this.base.playback) return;
-
-        try {
-            await this.#setCurrentTrack(
-                (await this.base.playback.getCurrentTlTrack()) as TlTrack,
-            );
-        } catch (e: unknown) {
-            console.error("Failed to get current track");
-            console.error(e);
-        }
-    }
-    async #setCurrentTrack(track: TlTrack | null) {
+    async #setCurrentTrack(track: null | TlTrack) {
         this.#currentTrack = track;
 
         if (track)
@@ -195,117 +322,371 @@ class MopidyState {
             }
     }
 
-    #timePosition = $state<number | null>(null);
-    get timePosition() {
-        return this.#timePosition;
-    }
-    set timePosition(timePosition: number | null) {
-        if (timePosition !== null)
-            void this.base.playback
-                ?.seek({ time_position: timePosition })
-                .then(() => void this.#updateTimePosition())
-                .catch((e: unknown) => {
-                    console.error("Failed to set time position");
-                    console.error(e);
-                });
-    }
-    async #updateTimePosition() {
-        if (!this.base.playback) return;
+    async #updateConsume() {
+        if (!this.#base.tracklist) return;
 
         try {
-            this.#timePosition = await this.base.playback.getTimePosition();
+            this.#consume = await this.#base.tracklist.getConsume();
         } catch (e: unknown) {
-            console.error("Failed to get time position");
+            console.error("Failed to get consume");
             console.error(e);
         }
     }
 
-    #playbackState = $state<PlaybackState>("stopped");
-    get playbackState() {
-        return this.#playbackState;
-    }
-    set playbackState(playbackState: PlaybackState) {
-        switch (playbackState) {
-            case "playing":
-                void this.base.playback?.resume();
-                break;
-            case "paused":
-                void this.base.playback?.pause();
-                break;
-            case "stopped":
-                void this.base.playback?.stop();
-                break;
-            default:
-                console.error("Unknown playback state");
-                break;
-        }
-    }
-    async #updatePlaybackState() {
-        if (!this.base.playback) return;
+    async #updateCurrentTrack() {
+        if (!this.#base.playback) return;
 
         try {
-            this.#playbackState = await this.base.playback.getState();
+            await this.#setCurrentTrack(
+                (await this.#base.playback.getCurrentTlTrack()) as TlTrack,
+            );
+        } catch (e: unknown) {
+            console.error("Failed to get current track");
+            console.error(e);
+        }
+    }
+
+    async #updatePlaybackState() {
+        if (!this.#base.playback) return;
+
+        try {
+            this.#playbackState = await this.#base.playback.getState();
         } catch (e: unknown) {
             console.error("Failed to get playback state");
             console.error(e);
         }
     }
 
-    togglePlaybackState() {
-        switch (this.playbackState) {
-            case "playing":
-                this.playbackState = "paused";
-                break;
-            case "paused":
-                this.playbackState = "playing";
-                break;
-            case "stopped":
-                break;
-            default:
-                console.error("Unknown playback state");
-                break;
+    async #updateRepeat() {
+        if (!this.#base.tracklist) return;
+
+        try {
+            this.#repeat = await this.#base.tracklist.getRepeat();
+        } catch (e: unknown) {
+            console.error("Failed to get repeat");
+            console.error(e);
         }
     }
 
-    skipPrevious() {
-        void this.base.playback?.previous();
+    async #updateShuffle() {
+        if (!this.#base.tracklist) return;
+
+        try {
+            this.#shuffle = await this.#base.tracklist.getRandom();
+        } catch (e: unknown) {
+            console.error("Failed to get shuffle");
+            console.error(e);
+        }
     }
 
-    skipNext() {
-        void this.base.playback?.next();
+    async #updateSingle() {
+        if (!this.#base.tracklist) return;
+
+        try {
+            this.#single = await this.#base.tracklist.getSingle();
+        } catch (e: unknown) {
+            console.error("Failed to get single");
+            console.error(e);
+        }
     }
 
-    // Library
+    async #updateTimePosition() {
+        if (!this.#base.playback) return;
 
-    #artists = new SvelteMap<ArtistURI, Artist[]>();
-
-    getArtist(uri: ArtistURI) {
-        return this.#artists.get(uri);
+        try {
+            this.#timePosition = await this.#base.playback.getTimePosition();
+        } catch (e: unknown) {
+            console.error("Failed to get time position");
+            console.error(e);
+        }
     }
 
-    async requestArtists(uris: ArtistURI[]) {
-        // TODO
+    // @sort Library
+
+    get albums() {
+        return this.#albums.values().toArray();
     }
 
-    #albums = new SvelteMap<AlbumURI, Album[]>();
+    get artists() {
+        return this.#artists.values().toArray();
+    }
+
+    get currentTrackImage() {
+        return this.#currentTrackImage;
+    }
+
+    get directories() {
+        return this.#directories.values().toArray();
+    }
+
+    get tracks() {
+        return this.#tracks.values().toArray();
+    }
+
+    #albums = new SvelteMap<AlbumURI, AlbumWithTracks>();
+
+    #artists = new SvelteMap<ArtistURI, ArtistWithAlbums>();
+
+    #directories = new SvelteMap<DirectoryURI | null, Directory>();
+
+    #tracks = new SvelteMap<TrackURI, Track>();
 
     getAlbum(uri: AlbumURI) {
         return this.#albums.get(uri);
     }
 
-    async requestAlbums(uris: AlbumURI[]) {
-        // TODO
+    getArtist(uri: ArtistURI) {
+        return this.#artists.get(uri);
     }
 
-    #tracks = new SvelteMap<TrackURI, Track[]>();
+    getDirectory(uri: DirectoryURI | null) {
+        return this.#directories.get(uri);
+    }
 
     getTrack(uri: TrackURI) {
         return this.#tracks.get(uri);
     }
 
-    async requestTracks(uris: TrackURI[]) {
-        // TODO
+    async #getTracks(uri: ModelURI) {
+        if (!this.#base.library) return;
+
+        try {
+            return models(
+                (
+                    await this.#base.library.lookup({
+                        uris: [uri],
+                    })
+                )[uri],
+            );
+        } catch (e: unknown) {
+            console.error("Failed to get tracks");
+            console.error(e);
+        }
     }
+
+    async #updateAlbum(uri: AlbumURI) {
+        if (!this.#base.library) return;
+
+        try {
+            const tracks = await this.#getTracks(uri);
+            const album = tracks?.at(0)?.album;
+
+            if (!album) return;
+
+            const albumWithTracks = {
+                ...album,
+                tracks,
+            };
+
+            this.#albums.set(uri, albumWithTracks);
+
+            for (const artist of albumWithTracks.artists)
+                this.#artists.get(artist.uri)?.albums.push(albumWithTracks);
+
+            return albumWithTracks;
+        } catch (e: unknown) {
+            console.error("Failed to get album");
+            console.error(e);
+        }
+    }
+
+    async #updateArtist(uri: ArtistURI) {
+        if (!this.#base.library) return;
+
+        try {
+            const tracks = await this.#getTracks(uri);
+            const artist = tracks
+                ?.flatMap((track) => track.artists)
+                .find((artist) => artist.uri === uri);
+
+            if (!artist) return;
+
+            const artistWithAlbums: ArtistWithAlbums = {
+                ...artist,
+                albums: this.#albums
+                    .values()
+                    .toArray()
+                    .filter((album) =>
+                        album.artists.some((a) => a.uri === uri),
+                    ),
+            };
+
+            this.#artists.set(uri, artistWithAlbums);
+
+            return artistWithAlbums;
+        } catch (e: unknown) {
+            console.error("Failed to get artist");
+            console.error(e);
+        }
+    }
+
+    async #updateDirectory(uri: DirectoryURI | null, name?: string) {
+        if (!this.#base.library) return;
+
+        try {
+            const directory = models(
+                await this.#base.library.browse({
+                    // @ts-expect-error: It should accept null
+                    uri,
+                }),
+            );
+
+            this.#directories.set(uri, {
+                children: directory,
+                name,
+                uri,
+            });
+
+            await Promise.allSettled(
+                directory.map((item) => {
+                    switch (item.type) {
+                        case "album":
+                            return this.#updateAlbum(item.uri);
+                        case "artist":
+                            return this.#updateArtist(item.uri);
+                        case "directory":
+                            return this.#updateDirectory(item.uri, item.name);
+                        case "track":
+                            return this.#updateTrack(item.uri);
+                    }
+                }),
+            );
+
+            return directory;
+        } catch (e: unknown) {
+            console.error("Failed to walk directory");
+            console.error(e);
+        }
+    }
+
+    async #updateTrack(uri: TrackURI) {
+        if (!this.#base.library) return;
+
+        try {
+            const tracks = await this.#getTracks(uri);
+
+            if (tracks?.length !== 1) return;
+
+            this.#tracks.set(uri, tracks[0]);
+
+            return tracks[0];
+        } catch (e: unknown) {
+            console.error("Failed to get track");
+            console.error(e);
+        }
+    }
+
+    // @sort Playlists
+
+    get playlists() {
+        return this.#playlists.values().toArray();
+    }
+
+    #playlists = new SvelteMap<PlaylistURI, Playlist>();
+
+    getPlaylist(uri: PlaylistURI) {
+        return this.#playlists.get(uri);
+    }
+
+    async #updatePlaylists() {
+        if (!this.#base.playlists) return;
+
+        try {
+            await Promise.allSettled(
+                models(await this.#base.playlists.asList())
+                    .filter((ref) => ref.type === "playlist")
+                    .map(async ({ uri }) => {
+                        const playlist = await this.#base.playlists?.lookup({
+                            uri,
+                        });
+
+                        if (!playlist) return;
+
+                        this.#playlists.set(uri, model(playlist));
+                    }),
+            );
+        } catch (e: unknown) {
+            console.error("Failed to get playlists");
+            console.error(e);
+        }
+    }
+
+    // @sort Mixer
+
+    get mute() {
+        return this.#mute;
+    }
+    set mute(mute: boolean) {
+        void this.#base.mixer?.setMute({ mute });
+    }
+
+    get volume() {
+        return this.#volume;
+    }
+    set volume(volume: number) {
+        void this.#base.mixer?.setVolume({ volume });
+    }
+
+    #mute = $state(false);
+
+    #volume = $state(100);
+
+    async #updateMute() {
+        if (!this.#base.mixer) return;
+
+        try {
+            this.#mute = (await this.#base.mixer.getMute()) ?? false;
+        } catch (e: unknown) {
+            console.error("Failed to get mute");
+            console.error(e);
+        }
+    }
+
+    async #updateVolume() {
+        if (!this.#base.mixer) return;
+
+        try {
+            this.#volume = (await this.#base.mixer.getVolume()) ?? 100;
+        } catch (e: unknown) {
+            console.error("Failed to get volume");
+            console.error(e);
+        }
+    }
+
+    // @sort History
+
+    get history() {
+        return this.#history;
+    }
+
+    #history = $state<HistoryEntry[]>([]);
+
+    async #updateHistory() {
+        if (!this.#base.history) return;
+
+        try {
+            this.#history = (
+                (await this.#base.history.getHistory()) as unknown as [
+                    number,
+                    TrackRef,
+                ][]
+            ).map(([date, track]) => ({
+                timestamp: new Date(date),
+                track,
+            }));
+        } catch (e: unknown) {
+            console.error("Failed to get history");
+            console.error(e);
+        }
+    }
+
+    // @sort Images
+
+    #currentTrackImage: null | string = $derived(
+        this.#currentTrack
+            ? (this.getImage(this.#currentTrack.track.uri) ?? null)
+            : null,
+    );
 
     #images = new SvelteMap<ModelURI, string>();
 
@@ -313,22 +694,11 @@ class MopidyState {
         return this.#images.get(uri);
     }
 
-    #currentTrackImage: string | null = $derived(
-        this.#currentTrack
-            ? (this.getImage(this.#currentTrack.track.uri) ?? null)
-            : null,
-    );
-    get currentTrackImage() {
-        return this.#currentTrackImage;
-    }
-
     async requestImages(uris: ModelURI[]) {
         try {
             const images =
-                (await this.base.library?.getImages({
-                    uris: uris.filter(
-                        (uri) => !this.#images.has(uri),
-                    ) as string[],
+                (await this.#base.library?.getImages({
+                    uris: uris.filter((uri) => !this.#images.has(uri)),
                 })) ?? {};
 
             for (const [uri, imageList] of Object.entries(images)) {
@@ -337,7 +707,7 @@ class MopidyState {
                 if (!image) continue;
 
                 const url = new URL(image.uri, BASE_URL).toString();
-                this.#images.set(uri as ModelURI, url);
+                this.#images.set(brand(uri), url);
             }
 
             return uris.map((uri) => this.#images.get(uri));
@@ -347,100 +717,22 @@ class MopidyState {
         }
     }
 
-    // Playlists
+    // @sort Palette
 
-    #playlists = $state<PlaylistURI[]>([]);
-    get playlists() {
-        return this.#playlists;
-    }
-    async #updatePlaylists() {
-        if (!this.base.playlists) return;
-
-        try {
-            this.#playlists = (await this.base.playlists.asList()).map((r) =>
-                brand(r.uri),
-            );
-        } catch (e: unknown) {
-            console.error("Failed to get playlists");
-            console.error(e);
-        }
+    get currentTrackPalette() {
+        return this.#currentTrackPalette;
     }
 
-    // Mixer
-
-    #mute = $state(false);
-    get mute() {
-        return this.#mute;
-    }
-    set mute(mute: boolean) {
-        void this.base.mixer?.setMute({ mute });
-    }
-    async #updateMute() {
-        if (!this.base.mixer) return;
-
-        try {
-            this.#mute = (await this.base.mixer.getMute()) ?? false;
-        } catch (e: unknown) {
-            console.error("Failed to get mute");
-            console.error(e);
-        }
-    }
-
-    #volume = $state(100);
-    get volume() {
-        return this.#volume;
-    }
-    set volume(volume: number) {
-        void this.base.mixer?.setVolume({ volume });
-    }
-    async #updateVolume() {
-        if (!this.base.mixer) return;
-
-        try {
-            this.#volume = (await this.base.mixer.getVolume()) ?? 100;
-        } catch (e: unknown) {
-            console.error("Failed to get volume");
-            console.error(e);
-        }
-    }
-
-    // History
-
-    #history = $state<[Date, string][]>([]);
-    get history() {
-        return this.#history;
-    }
-    async #updateHistory() {
-        if (!this.base.history) return;
-
-        try {
-            this.#history = Object.entries(
-                await this.base.history.getHistory(),
-            ).flatMap(([date, tracks]) => {
-                const d = new Date(parseInt(date, 10));
-                return tracks.map((track) => [d, track.uri] as [Date, string]);
-            });
-        } catch (e: unknown) {
-            console.error("Failed to get history");
-            console.error(e);
-        }
-    }
-
-    // Palette
+    #currentTrackPalette: null | string = $derived(
+        this.#currentTrackImage
+            ? (this.getPalette(this.#currentTrackImage) ?? null)
+            : null,
+    );
 
     #palettes = new SvelteMap<string, string>();
 
-    getPallete(url: string) {
+    getPalette(url: string) {
         return this.#palettes.get(url);
-    }
-
-    #currentTrackPalette: string | null = $derived(
-        this.#currentTrackImage
-            ? (this.getPallete(this.#currentTrackImage) ?? null)
-            : null,
-    );
-    get currentTrackPalette() {
-        return this.#currentTrackPalette;
     }
 
     async requestPalette(url: string) {
@@ -475,21 +767,22 @@ class MopidyState {
         }
     }
 
-    // Lyrics
+    // @sort Lyrics
+
+    get currentTrackLyrics() {
+        return this.#currentTrackLyrics;
+    }
+
+    #currentTrackLyrics: null | TrackLyrics = $derived(
+        this.#currentTrack
+            ? (this.getLyrics(this.#currentTrack.track.uri) ?? null)
+            : null,
+    );
 
     #lyrics = new SvelteMap<TrackURI, TrackLyrics>();
 
     getLyrics(uri: TrackURI) {
         return this.#lyrics.get(uri);
-    }
-
-    #currentTrackLyrics: TrackLyrics | null = $derived(
-        this.#currentTrack
-            ? (this.getLyrics(this.#currentTrack.track.uri) ?? null)
-            : null,
-    );
-    get currentTrackLyrics() {
-        return this.#currentTrackLyrics;
     }
 
     async requestLyrics(track: Track) {
@@ -499,10 +792,10 @@ class MopidyState {
 
         try {
             const response = await lrclib.get({
-                trackName: track.name,
+                albumName: track.album.name,
                 artistName: track.artists.map((a) => a.name).join(", "),
-                albumName: track.album?.name,
                 duration: Math.round(track.length / 1000),
+                trackName: track.name,
             });
 
             if (!response.syncedLyrics) {
@@ -520,11 +813,11 @@ class MopidyState {
 
                     return [
                         {
+                            lyrics,
                             timestamp:
                                 10 *
                                 (parseInt(cs) +
                                     100 * (parseInt(s) + 60 * parseInt(m))),
-                            lyrics,
                         },
                     ];
                 }
@@ -540,18 +833,22 @@ class MopidyState {
         }
     }
 
+    // @sort Book Keeping
+
+    #base: Mopidy;
+
     constructor() {
-        this.base = new Mopidy({
+        this.#base = new Mopidy({
             webSocketUrl: new URL("/mopidy/ws", WS_URL).toString(),
         });
     }
 
     init() {
         // Tracklist
-        this.base.on("event:tracklistChanged", () => {
+        this.#base.on("event:tracklistChanged", () => {
             void this.#updateQueue();
         });
-        this.base.on("event:optionsChanged", () => {
+        this.#base.on("event:optionsChanged", () => {
             void this.#updateConsume();
             void this.#updateShuffle();
             void this.#updateRepeat();
@@ -559,20 +856,20 @@ class MopidyState {
         });
 
         // Playback
-        this.base.on("event:seeked", ({ time_position }) => {
+        this.#base.on("event:seeked", ({ time_position }) => {
             this.#timePosition = time_position;
         });
-        this.base.on("event:trackPlaybackStarted", ({ tl_track }) => {
-            void this.#setCurrentTrack(tl_track as TlTrack);
+        this.#base.on("event:trackPlaybackStarted", ({ tl_track }) => {
+            void this.#setCurrentTrack(model(tl_track));
             void this.#updatePreviousTrack();
             void this.#updateNextTrack();
             this.#timePosition = 0;
         });
-        this.base.on("event:trackPlaybackEnded", () => {
+        this.#base.on("event:trackPlaybackEnded", () => {
             this.#currentTrack = null;
             this.#timePosition = null;
         });
-        this.base.on("event:playbackStateChanged", ({ new_state }) => {
+        this.#base.on("event:playbackStateChanged", ({ new_state }) => {
             this.#playbackState = new_state;
         });
 
@@ -587,21 +884,23 @@ class MopidyState {
         // Playlists
 
         // Mixer
-        this.base.on("event:muteChanged", ({ mute }) => {
+        this.#base.on("event:muteChanged", ({ mute }) => {
             this.#mute = mute;
         });
-        this.base.on("event:volumeChanged", ({ volume }) => {
+        this.#base.on("event:volumeChanged", ({ volume }) => {
             this.#volume = volume;
         });
 
         // History
+
+        // Images
 
         // Palette
 
         // Lyrics
 
         return new Promise<void>((resolve, reject) => {
-            this.base.on("state:online", () => {
+            this.#base.on("state:online", () => {
                 Promise.allSettled([
                     // Tracklist
                     this.#updateQueue(),
@@ -618,6 +917,7 @@ class MopidyState {
                     this.#updatePlaybackState(),
 
                     // Library
+                    this.#updateDirectory(null),
 
                     // Playlists
                     this.#updatePlaylists(),

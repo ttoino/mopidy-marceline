@@ -1,23 +1,23 @@
 <script lang="ts">
-    import { formatDuration } from "$lib/format";
-    import type MopidyState from "$lib/state/mopidy.svelte";
     import type { TlTrack, Track } from "$lib/types/mopidy";
+
+    import { getMopidy } from "$lib/context/mopidy";
     import { getContext } from "svelte";
-    import { Virtualizer } from "virtua/svelte";
     import {
         Icon,
         List,
-        ListItem,
         Menu,
         MenuItem,
         MenuList,
         MenuTrigger,
     } from "svelte-m3c";
-    import { base } from "$app/paths";
+    import { Virtualizer } from "virtua/svelte";
 
-    let { tracks }: { tracks: Track[] | TlTrack[] } = $props();
+    import TrackListItem from "./item/TrackListItem.svelte";
 
-    let scroll = getContext("scroll") as () => HTMLElement | null;
+    let { tracks }: { tracks: TlTrack[] | Track[] } = $props();
+
+    const scroll = getContext("scroll") as () => HTMLElement | null;
     let scrollRef = $derived(scroll());
 
     let listRef = $state<HTMLElement | null>(null);
@@ -29,7 +29,7 @@
             : 0,
     );
 
-    let mopidy = getContext("mopidy") as MopidyState;
+    const mopidy = getMopidy();
 
     $effect(() => {
         mopidy.requestImages(
@@ -47,86 +47,39 @@
             {scrollRef}
             {startMargin}
         >
-            {#snippet children(item)}
+            {#snippet children(item: TlTrack | Track)}
                 {@const track = "track" in item ? item.track : item}
-                {@const active =
-                    "tlid" in item
-                        ? item.tlid === mopidy.currentTrack?.tlid
-                        : item.uri === mopidy.currentTrack?.track.uri}
 
                 <Menu type="context">
                     <MenuTrigger>
                         {#snippet child({ props })}
-                            <ListItem
-                                lines={2}
-                                labelTextClass={active && "text-primary"}
-                                supportingTextClass={active && "text-secondary"}
-                                trailingClass={active && "text-secondary"}
-                                {...props}
-                            >
-                                {#snippet leading()}
-                                    {@const image = mopidy.getImage(track.uri)}
-
-                                    {#if image}
-                                        <img
-                                            src={image}
-                                            alt="Album cover"
-                                            class="aspect-square h-full object-cover"
-                                        />
-                                    {/if}
-                                {/snippet}
-                                {#snippet labelText()}
-                                    <a
-                                        class="relative after:absolute after:inset-0 after:z-10 hover:underline"
-                                        href="{base}/track/{encodeURIComponent(
-                                            track.uri,
-                                        )}"
-                                    >
-                                        {track.name}
-                                    </a>
-                                {/snippet}
-                                {#snippet supportingText()}
-                                    {#each track.artists as artist, index (artist.uri)}
-                                        {#if index > 0},
-                                        {/if}
-                                        <a
-                                            class="relative after:absolute after:inset-0 after:z-10 hover:underline"
-                                            href="{base}/artist/{encodeURIComponent(
-                                                artist.uri,
-                                            )}"
-                                        >
-                                            {artist.name}
-                                        </a>
-                                    {/each}
-                                    ‧
-                                    <a
-                                        class="relative after:absolute after:inset-0 after:z-10 hover:underline"
-                                        href="{base}/album/{encodeURIComponent(
-                                            track.album.uri,
-                                        )}"
-                                    >
-                                        {track.album.name}
-                                    </a>
-                                {/snippet}
-                                {#snippet trailing()}
-                                    {formatDuration(track.length)}
-                                {/snippet}
-                            </ListItem>
+                            <TrackListItem {track} {...props} />
                         {/snippet}
                     </MenuTrigger>
 
-                    <MenuList>
-                        <MenuItem>
+                    <MenuList class="z-50">
+                        {#if "tlid" in item}
+                            <MenuItem
+                                onSelect={() =>
+                                    mopidy.removeFromQueue(item.tlid)}
+                            >
+                                {#snippet leading()}<Icon
+                                        icon="clear"
+                                    />{/snippet}
+                                {#snippet text()}Remove from queue{/snippet}
+                            </MenuItem>
+                        {/if}
+                        <MenuItem onSelect={() => mopidy.playNow(track)}>
                             {#snippet leading()}<Icon
                                     icon="play_arrow"
                                 />{/snippet}
                             {#snippet text()}Play{/snippet}
                         </MenuItem>
-                        <MenuItem>
+                        <MenuItem onSelect={() => mopidy.playNext(track)}>
                             {#snippet leading()}<Icon icon="resume" />{/snippet}
                             {#snippet text()}Play next{/snippet}
                         </MenuItem>
-                        <MenuItem>
+                        <MenuItem onSelect={() => mopidy.addToQueue(track)}>
                             {#snippet leading()}<Icon icon="add" />{/snippet}
                             {#snippet text()}Add to queue{/snippet}
                         </MenuItem>

@@ -1,16 +1,16 @@
 import type { LRCLibResponse } from "./types/lrclib";
 
 export const get = async (args: {
-    trackName: string;
-    artistName: string;
     albumName?: string;
+    artistName: string;
     duration?: number;
+    trackName: string;
 }) => {
     const params = new URLSearchParams({
-        track_name: args.trackName,
-        artist_name: args.artistName,
         album_name: args.albumName ?? "",
+        artist_name: args.artistName,
         duration: args.duration?.toString() || "",
+        track_name: args.trackName,
     });
 
     const response = await fetch(`https://lrclib.net/api/get?${params}`);

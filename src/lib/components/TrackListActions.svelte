@@ -1,7 +1,7 @@
 <script lang="ts">
-    import type MopidyState from "$lib/state/mopidy.svelte";
     import type { Track, TrackURI } from "$lib/types/mopidy";
-    import { getContext } from "svelte";
+
+    import { getMopidy } from "$lib/context/mopidy";
     import {
         Button,
         Icon,
@@ -14,30 +14,14 @@
 
     let { tracks }: { tracks: Track[] | TrackURI[] } = $props();
 
-    let opts = $derived(
-        tracks.length > 0
-            ? typeof tracks[0] === "string"
-                ? {
-                      uris: tracks as TrackURI[],
-                  }
-                : {
-                      tracks: tracks as Track[],
-                  }
-            : {},
-    );
-
-    let mopidy = getContext("mopidy") as MopidyState;
+    const mopidy = getMopidy();
 </script>
 
 <div class="flex flex-row items-center gap-2">
     <Button
-        variant="filled"
         icon="play_arrow"
-        onclick={async () => {
-            await mopidy.base.tracklist?.clear();
-            await mopidy.base.tracklist?.add(opts);
-            await mopidy.base.playback?.play({});
-        }}
+        onclick={() => mopidy.playNow(tracks)}
+        variant="filled"
     >
         Play
     </Button>
@@ -49,14 +33,7 @@
             {/snippet}
         </MenuTrigger>
         <MenuList>
-            <MenuItem
-                onSelect={() => {
-                    mopidy.base.tracklist?.add({
-                        ...opts,
-                        at_position: 1,
-                    });
-                }}
-            >
+            <MenuItem onSelect={() => mopidy.playNext(tracks)}>
                 {#snippet leading()}
                     <Icon icon="resume" />
                 {/snippet}
@@ -64,11 +41,7 @@
                     Play next
                 {/snippet}
             </MenuItem>
-            <MenuItem
-                onSelect={() => {
-                    mopidy.base.tracklist?.add(opts);
-                }}
-            >
+            <MenuItem onSelect={() => mopidy.addToQueue(tracks)}>
                 {#snippet leading()}
                     <Icon icon="add" />
                 {/snippet}

@@ -1,16 +1,20 @@
 <script lang="ts">
-    import TrackList from "$lib/components/TrackList.svelte";
-    import type MopidyState from "$lib/state/mopidy.svelte";
-    import { getContext } from "svelte";
-
+    import TrackHero from "$lib/components/hero/TrackHero.svelte";
+    import TlTrackList from "$lib/components/list/TlTrackList.svelte";
     import QueueActions from "$lib/components/QueueActions.svelte";
+    import Title from "$lib/components/Title.svelte";
+    import { getMopidy } from "$lib/context/mopidy";
 
-    let mopidy = getContext("mopidy") as MopidyState;
+    const mopidy = getMopidy();
 </script>
 
 <svelte:head>
-    <title>Queue</title>
+    <Title text={mopidy.currentTrack?.track.name ?? "Queue"} />
 </svelte:head>
+
+{#if mopidy.currentTrack?.track}
+    <TrackHero track={mopidy.currentTrack?.track} />
+{/if}
 
 <div class="flex flex-row items-center gap-2 px-4 pt-5 pb-2">
     <h1 class="shrink-0 grow text-display-l">Queue</h1>
@@ -18,6 +22,6 @@
     <QueueActions />
 </div>
 
-<TrackList tracks={mopidy.queue} />
+<TlTrackList tracks={mopidy.queue} />
 
 <!-- <Lyrics /> -->
