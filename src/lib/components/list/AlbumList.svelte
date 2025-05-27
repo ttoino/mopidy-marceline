@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { Album } from "$lib/types/mopidy";
+
     import AlbumListItem from "../item/AlbumListItem.svelte";
     import VirtualList from "./VirtualList.svelte";
 

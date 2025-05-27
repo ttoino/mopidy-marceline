@@ -1,6 +1,8 @@
 <script lang="ts">
-    import { getMopidy } from "$lib/context/mopidy";
     import type { AlbumWithTracks } from "$lib/types/mopidy";
+
+    import { getMopidy } from "$lib/context/mopidy";
+
     import TrackListActions from "../TrackListActions.svelte";
     import Hero from "./Hero.svelte";
 
@@ -10,7 +12,7 @@
         album: AlbumWithTracks;
     } = $props();
 
-    let mopidy = getMopidy();
+    const mopidy = getMopidy();
 
     let image = $derived(mopidy.getImage(album.uri));
 </script>

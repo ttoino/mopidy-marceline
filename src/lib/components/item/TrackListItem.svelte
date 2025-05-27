@@ -1,20 +1,20 @@
 <script lang="ts">
     import type { Track } from "$lib/types/mopidy";
+    import type { Snippet } from "svelte";
 
     import { base } from "$app/paths";
     import { getMopidy } from "$lib/context/mopidy";
     import { formatDuration } from "$lib/format";
     import { Icon, ListItem } from "svelte-m3c";
-    import type { Snippet } from "svelte";
 
     let {
+        leading: lead,
         track,
-        leading,
-        trailing,
+        trailing: trail,
         ...props
     }: {
-        track: Track;
         leading?: Snippet;
+        track: Track;
         trailing?: Snippet;
     } = $props();
 
@@ -33,7 +33,7 @@
     {...props}
 >
     {#snippet leading()}
-        {@render leading?.()}
+        {@render lead?.()}
 
         {#if image}
             <img
@@ -73,7 +73,7 @@
         </a>
     {/snippet}
     {#snippet trailing()}
-        {@render trailing?.()}
+        {@render trail?.()}
 
         {formatDuration(track.length)}
     {/snippet}

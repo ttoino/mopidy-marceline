@@ -7,8 +7,8 @@
     import Player from "$lib/components/Player.svelte";
     import Search from "$lib/components/Search.svelte";
     import { setMopidy } from "$lib/context/mopidy";
-    import { Provider, ScrollArea } from "svelte-m3c";
     import { setScroll } from "$lib/context/scroll";
+    import { Provider, ScrollArea } from "svelte-m3c";
 
     let { children, data } = $props();
 
@@ -31,7 +31,9 @@
             <Navigation />
             <ScrollArea bind:viewportRef={scrollRef}>
                 <Search />
-                <main class="min-h-full mx-auto flex flex-col max-w-(--breakpoint-large)">
+                <main
+                    class="mx-auto flex min-h-full max-w-(--breakpoint-large) flex-col"
+                >
                     {@render children()}
                 </main>
             </ScrollArea>

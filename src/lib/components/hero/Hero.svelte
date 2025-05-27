@@ -2,15 +2,15 @@
     import type { Snippet } from "svelte";
 
     let {
-        image,
-        title,
-        subtitle,
         actions,
+        image,
+        subtitle,
+        title,
     }: {
-        image?: string;
-        title: Snippet;
-        subtitle: Snippet;
         actions: Snippet;
+        image?: string;
+        subtitle: Snippet;
+        title: Snippet;
     } = $props();
 </script>
 

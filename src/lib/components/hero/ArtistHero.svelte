@@ -1,6 +1,8 @@
 <script lang="ts">
-    import { getMopidy } from "$lib/context/mopidy";
     import type { Artist } from "$lib/types/mopidy";
+
+    import { getMopidy } from "$lib/context/mopidy";
+
     import Hero from "./Hero.svelte";
 
     let {
@@ -9,7 +11,7 @@
         artist: Artist;
     } = $props();
 
-    let mopidy = getMopidy();
+    const mopidy = getMopidy();
 
     let image = $derived(mopidy.getImage(artist.uri));
 </script>

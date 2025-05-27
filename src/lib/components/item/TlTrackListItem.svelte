@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { TlTrack } from "$lib/types/mopidy";
+
     import TrackListItem from "./TrackListItem.svelte";
 
     let {

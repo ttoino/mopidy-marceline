@@ -1,9 +1,11 @@
 <script lang="ts">
+    import type { HistoryEntry } from "$lib/types/mopidy";
+
     import { SEPARATOR } from "$lib/constants";
     import { getMopidy } from "$lib/context/mopidy";
     import { formatDate, formatDateRelative } from "$lib/format";
-    import type { HistoryEntry } from "$lib/types/mopidy";
     import { Tooltip, TooltipRoot, TooltipTrigger } from "svelte-m3c";
+
     import TrackListItem from "./TrackListItem.svelte";
 
     let {
@@ -13,7 +15,7 @@
         entry: HistoryEntry;
     } = $props();
 
-    let mopidy = getMopidy();
+    const mopidy = getMopidy();
 
     let track = $derived(mopidy.getTrack(entry.track.uri));
 </script>

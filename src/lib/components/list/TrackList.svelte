@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { Track } from "$lib/types/mopidy";
+
     import TrackListItem from "../item/TrackListItem.svelte";
     import VirtualList from "./VirtualList.svelte";
 

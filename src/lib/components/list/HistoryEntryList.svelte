@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { HistoryEntry } from "$lib/types/mopidy";
+
     import HistoryEntryListItem from "../item/HistoryEntryListItem.svelte";
     import VirtualList from "./VirtualList.svelte";
 

@@ -1,7 +1,9 @@
 <script lang="ts">
+    import type { Track } from "$lib/types/mopidy";
+
     import { SEPARATOR } from "$lib/constants";
     import { getMopidy } from "$lib/context/mopidy";
-    import type { Track } from "$lib/types/mopidy";
+
     import TrackListActions from "../TrackListActions.svelte";
     import Hero from "./Hero.svelte";
 
@@ -11,7 +13,7 @@
         track: Track;
     } = $props();
 
-    let mopidy = getMopidy();
+    const mopidy = getMopidy();
 
     let image = $derived(mopidy.getImage(track.uri));
 </script>

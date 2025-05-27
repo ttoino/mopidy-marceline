@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { Directory } from "$lib/types/mopidy";
+
     import DirectoryListItem from "../item/DirectoryListItem.svelte";
     import VirtualList from "./VirtualList.svelte";
 

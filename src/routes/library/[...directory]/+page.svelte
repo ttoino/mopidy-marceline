@@ -1,7 +1,6 @@
 <script lang="ts">
     import RefList from "$lib/components/list/RefList.svelte";
     import Title from "$lib/components/Title.svelte";
-    import { getMopidy } from "$lib/context/mopidy.js";
 
     let { data } = $props();
 </script>

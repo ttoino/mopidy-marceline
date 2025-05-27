@@ -1,6 +1,7 @@
-<script lang="ts" generics="T">
-    import { getScroll } from "$lib/context/scroll";
+<script generics="T" lang="ts">
     import type { Snippet } from "svelte";
+
+    import { getScroll } from "$lib/context/scroll";
     import { List } from "svelte-m3c";
     import { Virtualizer } from "virtua/svelte";
 
@@ -10,13 +11,13 @@
         item,
     }: {
         data: T[];
-        getKey: (item: T, index: number) => string | number;
+        getKey: (item: T, index: number) => number | string;
         item: Snippet<[item: T, index: number]>;
     } = $props();
 
     let ref = $state<HTMLElement | null>(null);
 
-    let scroll = getScroll();
+    const scroll = getScroll();
     let scrollRef = $derived(scroll());
 
     let startMargin = $derived(
@@ -30,12 +31,12 @@
 <List bind:ref>
     {#if scrollRef}
         <Virtualizer
+            children={item}
             {data}
             {getKey}
             overscan={10}
             {scrollRef}
             {startMargin}
-            children={item}
         />
     {/if}
 </List>

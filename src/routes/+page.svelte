@@ -13,7 +13,7 @@
 </svelte:head>
 
 {#if mopidy.currentTrack?.track}
-    <TrackHero track={mopidy.currentTrack?.track} />
+    <TrackHero track={mopidy.currentTrack.track} />
 {/if}
 
 <div class="flex flex-row items-center gap-2 px-4 pt-5 pb-2">
