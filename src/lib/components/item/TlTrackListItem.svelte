@@ -1,17 +1,23 @@
 <script lang="ts">
     import type { TlTrack } from "$lib/types/mopidy";
 
+    import { getMopidy } from "$lib/context/mopidy";
+
+    import tlTrackActions from "../action/tlTrackActions";
     import TrackListItem from "./TrackListItem.svelte";
 
     let {
         track,
-        ...props
     }: {
         track: TlTrack;
     } = $props();
+
+    const mopidy = getMopidy();
+
+    let actions = $derived(tlTrackActions(mopidy, track));
 </script>
 
-<TrackListItem track={track.track} {...props}>
+<TrackListItem {actions} track={track.track}>
     {#snippet leading()}
         {track.tlid}
     {/snippet}

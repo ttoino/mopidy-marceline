@@ -1,5 +1,8 @@
 <script lang="ts">
+    import type { Actions } from "$lib/types/action";
     import type { Snippet } from "svelte";
+
+    import ButtonActions from "../action/ButtonActions.svelte";
 
     let {
         actions,
@@ -7,7 +10,7 @@
         subtitle,
         title,
     }: {
-        actions: Snippet;
+        actions: Actions;
         image?: string;
         subtitle: Snippet;
         title: Snippet;
@@ -26,6 +29,6 @@
             {@render subtitle()}
         </span>
 
-        {@render actions()}
+        <ButtonActions {actions} />
     </div>
 </div>

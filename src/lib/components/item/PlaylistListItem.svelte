@@ -1,13 +1,14 @@
 <script lang="ts">
     import type { Playlist } from "$lib/types/mopidy";
 
-    import { base } from "$app/paths";
     import { getMopidy } from "$lib/context/mopidy";
-    import { Icon, ListItem } from "svelte-m3c";
+    import { Icon } from "svelte-m3c";
+
+    import PlaylistLink from "../link/PlaylistLink.svelte";
+    import ListItem from "./ListItem.svelte";
 
     let {
         playlist,
-        ...props
     }: {
         playlist: Playlist;
     } = $props();
@@ -21,7 +22,7 @@
     });
 </script>
 
-<ListItem lines={1} {...props}>
+<ListItem lines={1}>
     {#snippet leading()}
         {#if image}
             <img
@@ -34,12 +35,7 @@
         {/if}
     {/snippet}
     {#snippet labelText()}
-        <a
-            class="after:absolute after:inset-0 after:z-10 hover:underline"
-            href="{base}/playlist/{encodeURIComponent(playlist.uri)}"
-        >
-            {playlist.name}
-        </a>
+        <PlaylistLink contained={false} {playlist} />
     {/snippet}
     {#snippet trailing()}
         {playlist.tracks.length} tracks

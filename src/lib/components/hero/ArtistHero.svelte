@@ -3,6 +3,7 @@
 
     import { getMopidy } from "$lib/context/mopidy";
 
+    import ArtistLink from "../link/ArtistLink.svelte";
     import Hero from "./Hero.svelte";
 
     let {
@@ -16,12 +17,10 @@
     let image = $derived(mopidy.getImage(artist.uri));
 </script>
 
-<Hero {image}>
+<Hero actions={[]} {image}>
     {#snippet title()}
-        {artist.name}
+        <ArtistLink {artist} />
     {/snippet}
 
     {#snippet subtitle()}{/snippet}
-
-    {#snippet actions()}{/snippet}
 </Hero>

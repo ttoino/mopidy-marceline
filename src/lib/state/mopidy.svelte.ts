@@ -5,6 +5,8 @@ import { brand } from "$lib/types/brand";
 import {
     type AlbumURI,
     type AlbumWithTracks,
+    type AnyTlTrack,
+    type AnyTlTracks,
     type AnyTrack,
     type AnyTracks,
     type ArtistURI,
@@ -18,6 +20,7 @@ import {
     type PlaybackState,
     type Playlist,
     type PlaylistURI,
+    type TlID,
     type TlTrack,
     type Track,
     type TrackLyrics,
@@ -98,18 +101,18 @@ class MopidyState {
         }
     }
 
-    async removeFromQueue(tlid: number) {
+    async removeFromQueue(tracks: AnyTlTrack | AnyTlTracks) {
         if (!this.#base.tracklist) return;
 
         try {
             await this.#base.tracklist.remove({
                 criteria: {
                     // @ts-expect-error: Types are wrong
-                    tlid: [tlid],
+                    tlid: this.#normalizeTlIDs(tracks),
                 },
             });
         } catch (e: unknown) {
-            console.error("Failed to remove track from queue");
+            console.error("Failed to remove tracks from queue");
             console.error(e);
         }
     }
@@ -125,10 +128,22 @@ class MopidyState {
         }
     }
 
+    #normalizeTlIDs(tracks: AnyTlTrack | AnyTlTracks) {
+        const trackArray = Array.isArray(tracks)
+            ? tracks
+            : ([tracks] as AnyTlTracks);
+
+        if (trackArray.length < 1) return [];
+
+        if (typeof trackArray[0] === "number") return trackArray as TlID[];
+
+        return (trackArray as TlTrack[]).map((t) => t.tlid);
+    }
+
     #normalizeTracks(tracks: AnyTrack | AnyTracks) {
         const trackArray = Array.isArray(tracks)
             ? tracks
-            : ([tracks] as TlTrack[] | Track[] | TrackURI[]);
+            : ([tracks] as AnyTracks);
 
         if (trackArray.length < 1) return {};
 
@@ -863,6 +878,7 @@ class MopidyState {
             void this.#setCurrentTrack(model(tl_track));
             void this.#updatePreviousTrack();
             void this.#updateNextTrack();
+            void this.#updateHistory();
             this.#timePosition = 0;
         });
         this.#base.on("event:trackPlaybackEnded", () => {
@@ -882,6 +898,7 @@ class MopidyState {
         // Library
 
         // Playlists
+        // TODO: Handle playlist events
 
         // Mixer
         this.#base.on("event:muteChanged", ({ mute }) => {

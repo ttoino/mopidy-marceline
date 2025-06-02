@@ -1,18 +1,23 @@
 <script lang="ts">
-    import type { Album } from "$lib/types/mopidy";
+    import type { AlbumWithTracks } from "$lib/types/mopidy";
 
-    import { base } from "$app/paths";
     import { getMopidy } from "$lib/context/mopidy";
-    import { Icon, ListItem } from "svelte-m3c";
+    import { Icon } from "svelte-m3c";
+
+    import tracksActions from "../action/tracksActions";
+    import AlbumLink from "../link/AlbumLink.svelte";
+    import ArtistsLinks from "../link/ArtistsLinks.svelte";
+    import ListItem from "./ListItem.svelte";
 
     let {
         album,
-        ...props
     }: {
-        album: Album;
+        album: AlbumWithTracks;
     } = $props();
 
     const mopidy = getMopidy();
+
+    let actions = $derived(tracksActions(mopidy, album.tracks));
 
     let image = $derived(mopidy.getImage(album.uri));
 
@@ -21,7 +26,7 @@
     });
 </script>
 
-<ListItem lines={2} {...props}>
+<ListItem {actions} lines={2}>
     {#snippet leading()}
         {#if image}
             <img
@@ -34,24 +39,10 @@
         {/if}
     {/snippet}
     {#snippet labelText()}
-        <a
-            class="after:absolute after:inset-0 after:z-10 hover:underline"
-            href="{base}/album/{encodeURIComponent(album.uri)}"
-        >
-            {album.name}
-        </a>
+        <AlbumLink {album} contained={false} />
     {/snippet}
     {#snippet supportingText()}
-        {#each album.artists as artist, index (artist.uri)}
-            {#if index > 0},
-            {/if}
-            <a
-                class="relative after:absolute after:inset-0 after:z-20 hover:underline"
-                href="{base}/artist/{encodeURIComponent(artist.uri)}"
-            >
-                {artist.name}
-            </a>
-        {/each}
+        <ArtistsLinks artists={album.artists} />
     {/snippet}
     {#snippet trailing()}
         {album.num_tracks} tracks

@@ -15,6 +15,7 @@ export type ModelURI =
     | PlaylistURI
     | TrackURI;
 export type PlaylistURI = Branded<string, "PlaylistURI">;
+export type TlID = Branded<number, "TlID">;
 export type TrackURI = Branded<string, "TrackURI">;
 
 // @sort Refs
@@ -75,6 +76,10 @@ export type AlbumWithTracks = {
     tracks: Track[];
 } & Album;
 
+export type AnyTlTrack = TlID | TlTrack;
+
+export type AnyTlTracks = TlID[] | TlTrack[];
+
 export type AnyTrack = TlTrack | Track | TrackRef | TrackURI;
 
 export type AnyTracks = TlTrack[] | Track[] | TrackRef[] | TrackURI[];
@@ -114,6 +119,7 @@ export type Playlist = Override<
 export type TlTrack = Override<
     Mopidy.models.TlTrack,
     {
+        tlid: TlID;
         track: Track;
     }
 >;

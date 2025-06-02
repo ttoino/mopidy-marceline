@@ -1,13 +1,14 @@
 <script lang="ts">
     import type { Directory } from "$lib/types/mopidy";
 
-    import { base } from "$app/paths";
     import { getMopidy } from "$lib/context/mopidy";
-    import { Icon, ListItem } from "svelte-m3c";
+    import { Icon } from "svelte-m3c";
+
+    import DirectoryLink from "../link/DirectoryLink.svelte";
+    import ListItem from "./ListItem.svelte";
 
     let {
         directory,
-        ...props
     }: {
         directory: Directory;
     } = $props();
@@ -19,7 +20,7 @@
     );
 </script>
 
-<ListItem containerClass="relative" lines={1} {...props}>
+<ListItem containerClass="relative" lines={1}>
     {#snippet leading()}
         {#if image}
             <img
@@ -32,11 +33,6 @@
         {/if}
     {/snippet}
     {#snippet labelText()}
-        <a
-            class="after:absolute after:inset-0 after:z-10 hover:underline"
-            href="{base}/library/{encodeURIComponent(directory.uri)}"
-        >
-            {directory.name}
-        </a>
+        <DirectoryLink contained={false} {directory} />
     {/snippet}
 </ListItem>

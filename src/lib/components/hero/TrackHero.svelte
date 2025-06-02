@@ -4,7 +4,10 @@
     import { SEPARATOR } from "$lib/constants";
     import { getMopidy } from "$lib/context/mopidy";
 
-    import TrackListActions from "../TrackListActions.svelte";
+    import trackActions from "../action/trackActions";
+    import AlbumLink from "../link/AlbumLink.svelte";
+    import ArtistsLinks from "../link/ArtistsLinks.svelte";
+    import TrackLink from "../link/TrackLink.svelte";
     import Hero from "./Hero.svelte";
 
     let {
@@ -16,20 +19,18 @@
     const mopidy = getMopidy();
 
     let image = $derived(mopidy.getImage(track.uri));
+
+    let actions = $derived(trackActions(mopidy, track));
 </script>
 
-<Hero {image}>
+<Hero {actions} {image}>
     {#snippet title()}
-        {track.name}
+        <TrackLink {track} />
     {/snippet}
 
     {#snippet subtitle()}
-        {track.artists.map((artist) => artist.name).join(", ")}
+        <ArtistsLinks artists={track.artists} />
         {SEPARATOR}
-        {track.album.name}
-    {/snippet}
-
-    {#snippet actions()}
-        <TrackListActions tracks={[track]} />
+        <AlbumLink album={track.album} />
     {/snippet}
 </Hero>

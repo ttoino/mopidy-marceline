@@ -1,13 +1,14 @@
 <script lang="ts">
     import type { Artist } from "$lib/types/mopidy";
 
-    import { base } from "$app/paths";
     import { getMopidy } from "$lib/context/mopidy";
-    import { Icon, ListItem } from "svelte-m3c";
+    import { Icon } from "svelte-m3c";
+
+    import ArtistLink from "../link/ArtistLink.svelte";
+    import ListItem from "./ListItem.svelte";
 
     let {
         artist,
-        ...props
     }: {
         artist: Artist;
     } = $props();
@@ -17,7 +18,7 @@
     let image = $derived(mopidy.getImage(artist.uri));
 </script>
 
-<ListItem lines={1} {...props}>
+<ListItem lines={1}>
     {#snippet leading()}
         {#if image}
             <img
@@ -30,11 +31,6 @@
         {/if}
     {/snippet}
     {#snippet labelText()}
-        <a
-            class="after:absolute after:inset-0 after:z-10 hover:underline"
-            href="{base}/artist/{encodeURIComponent(artist.uri)}"
-        >
-            {artist.name}
-        </a>
+        <ArtistLink {artist} contained={false} />
     {/snippet}
 </ListItem>
