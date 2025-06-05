@@ -18,7 +18,7 @@
 <Menu type="context">
     <MenuTrigger {child} />
 
-    <MenuList class="z-50">
+    <MenuList>
         {#each actions as action, index (index)}
             <MenuAction {action} />
         {/each}

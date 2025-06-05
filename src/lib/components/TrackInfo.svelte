@@ -1,8 +1,10 @@
 <script lang="ts">
     import type { Track } from "$lib/types/mopidy";
 
-    import { base } from "$app/paths";
     import { getMopidy } from "$lib/context/mopidy";
+
+    import ArtistsLinks from "./link/ArtistsLinks.svelte";
+    import TrackLink from "./link/TrackLink.svelte";
 
     let {
         track,
@@ -28,18 +30,10 @@
         />
     {/if}
     <div class="flex w-40 flex-col first:pl-2">
-        <a
-            class="truncate !text-title-m hover:underline"
-            href="{base}/track/{encodeURIComponent(track.uri)}"
-        >
-            {track.name}
-        </a>
-        <span class="truncate text-title-s text-outline">
-            {#each track.artists as artist (artist.uri)}
-                <span class="not-last:after:content-[',_']">
-                    {artist.name}
-                </span>
-            {/each}
-        </span>
+        <TrackLink class="truncate text-title-m" {track} />
+        <ArtistsLinks
+            class="truncate text-title-s text-outline"
+            artists={track.artists}
+        />
     </div>
 </div>

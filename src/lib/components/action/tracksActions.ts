@@ -18,4 +18,23 @@ export default (mopidy: MopidyState, tracks: AnyTracks): Actions => [
         icon: "add",
         label: "Add to Queue",
     },
+    "divider",
+    {
+        actions: [
+            ...mopidy.playlists.map((playlist) => ({
+                action: () => mopidy.addToPlaylist(playlist, tracks),
+                icon: "queue_music",
+                label: playlist.name,
+            })),
+            {
+                action: () => {
+                    // TODO: Implement creating new playlist
+                },
+                icon: "add",
+                label: "New playlist",
+            },
+        ],
+        icon: "playlist_add",
+        label: "Add to playlist",
+    },
 ];

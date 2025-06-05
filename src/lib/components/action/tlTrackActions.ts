@@ -10,5 +10,5 @@ export default (mopidy: MopidyState, tlTrack: TlTrack): Actions => [
         icon: "close",
         label: "Remove from Queue",
     },
-    ...trackActions(mopidy, tlTrack),
+    ...trackActions(mopidy, tlTrack.track),
 ];

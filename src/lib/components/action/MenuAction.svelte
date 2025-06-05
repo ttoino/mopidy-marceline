@@ -1,20 +1,18 @@
 <script lang="ts">
-    import type { Action, ActionGroup } from "$lib/types/action";
-    import type { ComponentProps } from "svelte";
+    import type { Action } from "$lib/types/action";
 
-    import { Icon, MenuItem } from "svelte-m3c";
+    import { Icon, Menu, MenuDivider, MenuItem, MenuList } from "svelte-m3c";
 
-    let {
-        action,
-        ...props
-    }: { action: Action | ActionGroup } & Omit<
-        ComponentProps<typeof MenuItem>,
-        "leading" | "onSelect" | "text"
-    > = $props();
+    import MenuAction from "./MenuAction.svelte";
+
+    let { action, class: className }: { action: Action; class?: string } =
+        $props();
 </script>
 
-{#if "action" in action}
-    <MenuItem onSelect={action.action} {...props}>
+{#if action === "divider"}
+    <MenuDivider class={className} />
+{:else if "action" in action}
+    <MenuItem containerClass={className} onSelect={action.action}>
         {#snippet text()}
             {action.label}
         {/snippet}
@@ -22,4 +20,20 @@
             <Icon icon={action.icon} />
         {/snippet}
     </MenuItem>
+{:else}
+    <Menu>
+        <MenuItem containerClass={className}>
+            {#snippet text()}
+                {action.label}
+            {/snippet}
+            {#snippet leading()}
+                <Icon icon={action.icon} />
+            {/snippet}
+        </MenuItem>
+        <MenuList>
+            {#each action.actions as subAction, index (index)}
+                <MenuAction action={subAction} />
+            {/each}
+        </MenuList>
+    </Menu>
 {/if}

@@ -55,7 +55,9 @@ class MopidyState {
         if (!this.#base.tracklist) return;
 
         try {
-            await this.#base.tracklist.add(this.#normalizeTracks(tracks));
+            await this.#base.tracklist.add({
+                uris: this.#normalizeTrackURIs(tracks),
+            });
         } catch (e: unknown) {
             console.error("Failed to add tracks to queue");
             console.error(e);
@@ -93,7 +95,9 @@ class MopidyState {
 
         try {
             await this.#base.tracklist.clear();
-            await this.#base.tracklist.add(this.#normalizeTracks(tracks));
+            await this.#base.tracklist.add({
+                uris: this.#normalizeTrackURIs(tracks),
+            });
             await this.#base.playback.play({});
         } catch (e: unknown) {
             console.error("Failed to play tracks now");
@@ -141,24 +145,24 @@ class MopidyState {
     }
 
     #normalizeTracks(tracks: AnyTrack | AnyTracks) {
+        return this.#normalizeTrackURIs(tracks)
+            .map((uri) => this.getTrack(uri))
+            .filter((track) => track !== undefined);
+    }
+
+    #normalizeTrackURIs(tracks: AnyTrack | AnyTracks) {
         const trackArray = Array.isArray(tracks)
             ? tracks
             : ([tracks] as AnyTracks);
 
-        if (trackArray.length < 1) return {};
+        if (trackArray.length < 1) return [];
 
-        if (typeof trackArray[0] === "string")
-            return { uris: trackArray as TrackURI[] };
+        if (typeof trackArray[0] === "string") return trackArray as TrackURI[];
 
         if ("uri" in trackArray[0])
-            return { uris: (trackArray as TrackRef[]).map((t) => t.uri) };
+            return (trackArray as Track[] | TrackRef[]).map((t) => t.uri);
 
-        return {
-            tracks:
-                "track" in trackArray[0]
-                    ? (trackArray as TlTrack[]).map((t) => t.track)
-                    : (trackArray as Track[]),
-        };
+        return (trackArray as TlTrack[]).map((t) => t.track.uri);
     }
 
     async #updateNextTrack() {
@@ -599,6 +603,61 @@ class MopidyState {
 
     #playlists = new SvelteMap<PlaylistURI, Playlist>();
 
+    async addToPlaylist(
+        playlist: Playlist | PlaylistURI,
+        tracks: AnyTrack | AnyTracks,
+    ) {
+        if (!this.#base.playlists) return;
+
+        console.debug(this.#tracks, tracks);
+
+        try {
+            const playlistModel =
+                typeof playlist === "string"
+                    ? this.getPlaylist(playlist)
+                    : playlist;
+
+            if (!playlistModel) return;
+
+            playlistModel.tracks.push(...this.#normalizeTracks(tracks));
+
+            const newPlaylist = await this.#base.playlists.save({
+                playlist: playlistModel,
+            });
+
+            if (!newPlaylist) return;
+
+            const newPlaylistModel = model(newPlaylist);
+            newPlaylistModel.tracks = this.#normalizeTracks(
+                newPlaylistModel.tracks,
+            );
+
+            this.#playlists.delete(playlistModel.uri);
+            this.#playlists.set(newPlaylistModel.uri, newPlaylistModel);
+        } catch (e: unknown) {
+            console.error("Failed to add tracks to playlist");
+            console.error(e);
+        }
+    }
+
+    async deletePlaylist(playlist: Playlist | PlaylistURI) {
+        if (!this.#base.playlists) return;
+
+        try {
+            const uri =
+                typeof playlist === "string"
+                    ? playlist
+                    : (playlist as Playlist).uri;
+
+            await this.#base.playlists.delete({ uri });
+
+            this.#playlists.delete(uri);
+        } catch (e: unknown) {
+            console.error("Failed to delete playlist");
+            console.error(e);
+        }
+    }
+
     getPlaylist(uri: PlaylistURI) {
         return this.#playlists.get(uri);
     }
@@ -607,7 +666,7 @@ class MopidyState {
         if (!this.#base.playlists) return;
 
         try {
-            await Promise.allSettled(
+            const r = await Promise.allSettled(
                 models(await this.#base.playlists.asList())
                     .filter((ref) => ref.type === "playlist")
                     .map(async ({ uri }) => {
@@ -617,9 +676,21 @@ class MopidyState {
 
                         if (!playlist) return;
 
-                        this.#playlists.set(uri, model(playlist));
+                        const playlistModel = model(playlist);
+                        playlistModel.tracks = this.#normalizeTracks(
+                            playlistModel.tracks,
+                        );
+
+                        this.#playlists.set(uri, playlistModel);
                     }),
             );
+
+            r.forEach((result) => {
+                if (result.status === "rejected") {
+                    console.error("Failed to update playlist");
+                    console.error(result.reason);
+                }
+            });
         } catch (e: unknown) {
             console.error("Failed to get playlists");
             console.error(e);

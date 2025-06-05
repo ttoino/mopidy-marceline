@@ -6,6 +6,7 @@
 
     import PlaylistLink from "../link/PlaylistLink.svelte";
     import ListItem from "./ListItem.svelte";
+    import playlistActions from "../action/playlistActions";
 
     let {
         playlist,
@@ -17,12 +18,14 @@
 
     let image = $derived(mopidy.getImage(playlist.uri));
 
+    let actions = $derived(playlistActions(mopidy, playlist));
+
     $effect(() => {
         mopidy.requestImages([playlist.uri]);
     });
 </script>
 
-<ListItem lines={1}>
+<ListItem lines={1} {actions}>
     {#snippet leading()}
         {#if image}
             <img

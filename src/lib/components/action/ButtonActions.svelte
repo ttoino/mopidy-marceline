@@ -14,7 +14,9 @@
     let { actions }: { actions: Actions } = $props();
 
     let alwaysVisible = $derived.by(() => {
-        const i = actions.findIndex((action) => "action" in action);
+        const i = actions.findIndex(
+            (action) => action !== "divider" && "action" in action,
+        );
 
         if (i === -1) return [];
 
@@ -26,9 +28,14 @@
         let skipped = 0;
 
         actions.forEach((action, index) => {
-            if ("actions" in action) r.push(index);
-            else if (skipped < 3) skipped++;
-            else r.push(index);
+            if (r.length === 0 && action === "divider") return;
+            else if (
+                action === "divider" ||
+                "actions" in action ||
+                skipped >= 3
+            )
+                r.push(index);
+            else skipped++;
         });
 
         return r;
@@ -37,14 +44,14 @@
 
 <div class="flex flex-row items-center gap-2">
     {#each actions as action, index (index)}
-        {#if !(index in alwaysHidden) && "action" in action}
+        {#if !alwaysHidden.includes(index) && action !== "divider" && "action" in action}
             <Button
                 containerClass={!(index in alwaysVisible)
                     ? "max-medium:hidden"
                     : ""}
                 icon={action.icon}
                 onclick={action.action}
-                variant={index in alwaysVisible ? "filled" : "text"}
+                variant={alwaysVisible.includes(index) ? "filled" : "text"}
             >
                 {action.label}
             </Button>
@@ -67,10 +74,10 @@
             {#each actions as action, index (index)}
                 {#if !(index in alwaysVisible)}
                     <MenuAction
-                        {action}
-                        containerClass={!(index in alwaysHidden)
+                        class={!alwaysHidden.includes(index)
                             ? "medium:hidden"
                             : ""}
+                        {action}
                     />
                 {/if}
             {/each}
