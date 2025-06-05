@@ -4,8 +4,6 @@
     import Title from "$lib/components/Title.svelte";
 
     let { data } = $props();
-
-    $inspect(data.playlist);
 </script>
 
 <svelte:head>

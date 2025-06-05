@@ -3,9 +3,9 @@
 
     import { getMopidy } from "$lib/context/mopidy";
 
+    import playlistActions from "../action/playlistActions";
     import PlaylistLink from "../link/PlaylistLink.svelte";
     import Hero from "./Hero.svelte";
-    import playlistActions from "../action/playlistActions";
 
     let {
         playlist,

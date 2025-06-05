@@ -4,9 +4,9 @@
     import { getMopidy } from "$lib/context/mopidy";
     import { Icon } from "svelte-m3c";
 
+    import playlistActions from "../action/playlistActions";
     import PlaylistLink from "../link/PlaylistLink.svelte";
     import ListItem from "./ListItem.svelte";
-    import playlistActions from "../action/playlistActions";
 
     let {
         playlist,
@@ -25,7 +25,7 @@
     });
 </script>
 
-<ListItem lines={1} {actions}>
+<ListItem {actions} lines={1}>
     {#snippet leading()}
         {#if image}
             <img
