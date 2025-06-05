@@ -1,4 +1,3 @@
-import { themeFromImage } from "@material/material-color-utilities";
 import { BASE_URL, WS_URL } from "$lib/constants";
 import * as lrclib from "$lib/lrclib";
 import { brand } from "$lib/types/brand";
@@ -28,6 +27,7 @@ import {
     type TrackURI,
 } from "$lib/types/mopidy";
 import Mopidy from "mopidy";
+import { cssPaletteFromImage } from "svelte-m3c/palette";
 import { SvelteMap } from "svelte/reactivity";
 
 class MopidyState {
@@ -824,29 +824,10 @@ class MopidyState {
     async requestPalette(url: string) {
         if (this.#palettes.has(url)) return this.#palettes.get(url);
 
-        const img = new Image();
-        img.crossOrigin = "";
-        img.src = url;
-
         try {
-            const theme = await themeFromImage(img);
-
-            this.#palettes.set(
-                url,
-                Object.entries(theme.palettes)
-                    .flatMap(([k, p]) =>
-                        [
-                            0, 4, 5, 6, 10, 12, 15, 17, 20, 22, 25, 30, 35, 40,
-                            50, 60, 70, 80, 90, 92, 94, 95, 96, 98, 99, 100,
-                        ].map(
-                            (v) =>
-                                `--color-${k.replace("V", "-v")}-${v.toString()}: #${(p.tone(v) & 0xffffff).toString(16).padStart(6, "0")}`,
-                        ),
-                    )
-                    .join(";"),
-            );
-
-            return this.#palettes.get(url);
+            const palette = await cssPaletteFromImage(url);
+            this.#palettes.set(url, palette);
+            return palette;
         } catch (e: unknown) {
             console.error("Failed to get palette");
             console.error(e);

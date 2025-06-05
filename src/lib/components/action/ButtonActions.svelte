@@ -46,7 +46,7 @@
     {#each actions as action, index (index)}
         {#if !alwaysHidden.includes(index) && action !== "divider" && "action" in action}
             <Button
-                containerClass={!(index in alwaysVisible)
+                containerClass={!(alwaysVisible.includes(index))
                     ? "max-medium:hidden"
                     : ""}
                 icon={action.icon}
