@@ -37,7 +37,7 @@
         "material-symbols": "^0.31.4",
         "mopidy": "^1.3.0",
         "prettier": "^3.4.2",
-        "prettier-plugin-svelte": "^3.3.3",
+        "prettier-plugin-svelte": "^3.4.0",
         "prettier-plugin-tailwindcss": "^0.6.11",
         "storybook": "^8.6.7",
         "svelte": "^5.0.0",
