@@ -105,8 +105,8 @@ importers:
         specifier: ^8.20.0
         version: 8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
       virtua:
-        specifier: ^0.40.3
-        version: 0.40.3(svelte@5.23.1)
+        specifier: ^0.41.3
+        version: 0.41.3(svelte@5.23.1)
       vite:
         specifier: ^6.0.0
         version: 6.2.2(jiti@2.4.2)(lightningcss@1.29.2)
@@ -1679,8 +1679,8 @@ packages:
   util@0.12.5:
     resolution: {integrity: sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==}
 
-  virtua@0.40.3:
-    resolution: {integrity: sha512-rfl6VohBFoT0U64fVdOGag2p0D+YZbki7HQ5bjFZObStWBaWjjataIHFDjl4KuSr3yHBMgGd/+Va7W4Z2Y0LRg==}
+  virtua@0.41.3:
+    resolution: {integrity: sha512-X0eG4hIsJFrmgiq5kiyxdBqu+83mn2ArO9L16flRg1cN0BrafOmRVYmYijgClKElTlhqLJ57cdGby0X6az2LGw==}
     peerDependencies:
       react: '>=16.14.0'
       react-dom: '>=16.14.0'
@@ -3238,7 +3238,7 @@ snapshots:
       is-typed-array: 1.1.15
       which-typed-array: 1.1.19
 
-  virtua@0.40.3(svelte@5.23.1):
+  virtua@0.41.3(svelte@5.23.1):
     optionalDependencies:
       svelte: 5.23.1
 
