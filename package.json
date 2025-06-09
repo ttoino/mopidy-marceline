@@ -42,7 +42,7 @@
         "tailwindcss": "^4.1.8",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.33.1",
-        "virtua": "^0.41.3",
+        "virtua": "^0.41.5",
         "vite": "^6.3.5"
     },
     "pnpm": {
