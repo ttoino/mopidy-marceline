@@ -2,25 +2,21 @@
     import type { Actions } from "$lib/types/action";
     import type { ComponentProps } from "svelte";
 
-    import { Menu, MenuList, MenuTrigger } from "svelte-m3c";
+    import { Menu } from "svelte-m3c";
 
     import MenuAction from "./MenuAction.svelte";
 
     let {
         actions,
-        child,
+        trigger,
     }: {
         actions: Actions;
-        child: ComponentProps<typeof MenuTrigger>["child"];
+        trigger: ComponentProps<typeof Menu>["trigger"];
     } = $props();
 </script>
 
-<Menu type="context">
-    <MenuTrigger {child} />
-
-    <MenuList>
-        {#each actions as action, index (index)}
-            <MenuAction {action} />
-        {/each}
-    </MenuList>
+<Menu strategy="context" {trigger}>
+    {#each actions as action, index (index)}
+        <MenuAction {action} />
+    {/each}
 </Menu>

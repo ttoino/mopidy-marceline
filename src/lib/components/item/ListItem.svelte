@@ -14,7 +14,7 @@
 </script>
 
 <MenuActions {actions}>
-    {#snippet child({ props })}
+    {#snippet trigger({ props })}
         <ListItem {...mergeProps(rest, props)} />
     {/snippet}
 </MenuActions>

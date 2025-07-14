@@ -4,7 +4,7 @@
     import { SEPARATOR } from "$lib/constants";
     import { getMopidy } from "$lib/context/mopidy";
     import { formatDate, formatDateRelative } from "$lib/format";
-    import { Tooltip, TooltipRoot, TooltipTrigger } from "svelte-m3c";
+    import { Tooltip } from "svelte-m3c";
 
     import TrackListItem from "./TrackListItem.svelte";
 
@@ -23,16 +23,18 @@
 {#if track}
     <TrackListItem {track} {...props}>
         {#snippet trailing()}
-            <TooltipRoot>
-                <TooltipTrigger
-                    class="relative before:absolute before:inset-0 before:z-10"
-                >
-                    {formatDateRelative(entry.timestamp)} ago
-                </TooltipTrigger>
-                <Tooltip>
-                    {formatDate(entry.timestamp)}
-                </Tooltip>
-            </TooltipRoot>
+            <Tooltip>
+                {#snippet trigger({ props })}
+                    <span
+                        class="relative cursor-pointer before:absolute before:inset-0 before:z-10"
+                        {...props}
+                    >
+                        {formatDateRelative(entry.timestamp)} ago
+                    </span>
+                {/snippet}
+
+                {formatDate(entry.timestamp)}
+            </Tooltip>
 
             <span>{SEPARATOR}</span>
         {/snippet}

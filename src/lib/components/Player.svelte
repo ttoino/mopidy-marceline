@@ -3,12 +3,11 @@
     import { formatDuration } from "$lib/format";
     import { mergeProps, Popover } from "bits-ui";
     import {
+        StandardButtonGroup,
         IconButton,
         Slider,
         ToggleIconButton,
         Tooltip,
-        TooltipRoot,
-        TooltipTrigger,
     } from "svelte-m3c";
     import { slide } from "svelte/transition";
 
@@ -20,58 +19,52 @@
 
 <aside
     style={mopidy.currentTrackPalette}
-    class="fixed right-0 bottom-0 left-0 z-50 flex h-20 flex-row items-center gap-8 rounded-t-lg bg-surface-container p-2 text-on-surface-variant palette"
+    class="fixed right-0 bottom-0 left-0 z-50 flex h-20 flex-row items-center gap-8 rounded-t-lg bg-surface-container p-2 text-on-surface-variant"
     transition:slide={{ axis: "y" }}
 >
     {#if mopidy.currentTrack}
         <TrackInfo track={mopidy.currentTrack.track} />
 
-        <div class="flex flex-row gap-2">
-            <TooltipRoot>
-                <TooltipTrigger>
-                    {#snippet child({ props })}
-                        <IconButton
-                            icon="skip_previous"
-                            {...mergeProps(props, {
-                                onclick: () => mopidy.skipPrevious(),
-                            })}
-                        />
-                    {/snippet}
-                </TooltipTrigger>
-                {#if mopidy.previousTrack}
-                    <TrackPreview track={mopidy.previousTrack.track} />
-                {:else}
-                    <Tooltip>Previous track</Tooltip>
-                {/if}
-            </TooltipRoot>
+        <StandardButtonGroup variant="tonal" color="secondary" width="narrow">
+            {#snippet prev({ props })}
+                <IconButton
+                    icon="skip_previous"
+                    {...mergeProps(props, {
+                        onclick: () => mopidy.skipPrevious(),
+                    })}
+                />
+            {/snippet}
+            {#if mopidy.previousTrack}
+                <TrackPreview
+                    track={mopidy.previousTrack.track}
+                    trigger={prev}
+                />
+            {:else}
+                <Tooltip trigger={prev}>Previous track</Tooltip>
+            {/if}
             <IconButton
                 icon={mopidy.playbackState === "playing"
                     ? "pause"
                     : "play_arrow"}
                 onclick={() => mopidy.togglePlaybackState()}
-                tooltip={mopidy.playbackState === "playing"
-                    ? "Pause"
-                    : "Resume"}
                 variant="filled"
+                color="primary"
+                width="wide"
             />
-            <TooltipRoot>
-                <TooltipTrigger>
-                    {#snippet child({ props })}
-                        <IconButton
-                            icon="skip_next"
-                            {...mergeProps(props, {
-                                onclick: () => mopidy.skipNext(),
-                            })}
-                        />
-                    {/snippet}
-                </TooltipTrigger>
-                {#if mopidy.nextTrack}
-                    <TrackPreview track={mopidy.nextTrack.track} />
-                {:else}
-                    <Tooltip>Next track</Tooltip>
-                {/if}
-            </TooltipRoot>
-        </div>
+            {#snippet next({ props })}
+                <IconButton
+                    icon="skip_next"
+                    {...mergeProps(props, {
+                        onclick: () => mopidy.skipNext(),
+                    })}
+                />
+            {/snippet}
+            {#if mopidy.nextTrack}
+                <TrackPreview track={mopidy.nextTrack.track} trigger={next} />
+            {:else}
+                <Tooltip trigger={next}>Next track</Tooltip>
+            {/if}
+        </StandardButtonGroup>
 
         {#if mopidy.timePosition !== null}
             <div class="flex flex-1 flex-row items-center gap-2">
@@ -79,7 +72,7 @@
                     {formatDuration(mopidy.timePosition)}
                 </span>
                 <Slider
-                    class="!min-w-auto grow"
+                    containerClass="!min-w-auto grow"
                     collapsible
                     max={mopidy.currentTrack.track.length / 1000}
                     onValueCommit={(timePosition: number) => {
@@ -102,17 +95,17 @@
     <div class="mr-2 flex flex-row items-center">
         <ToggleIconButton
             icon="restaurant"
-            title="Consume"
+            variant="text"
             bind:pressed={mopidy.consume}
         />
         <ToggleIconButton
             icon="shuffle"
-            title="Shuffle"
+            variant="text"
             bind:pressed={mopidy.shuffle}
         />
         <ToggleIconButton
             icon="repeat"
-            title="Repeat"
+            variant="text"
             bind:pressed={mopidy.repeat}
         />
 
@@ -128,6 +121,7 @@
                               : mopidy.volume > 25
                                 ? "volume_down"
                                 : "volume_mute"}
+                        variant="text"
                         {...props}
                     />
                 {/snippet}

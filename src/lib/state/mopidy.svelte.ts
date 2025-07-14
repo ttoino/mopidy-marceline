@@ -132,6 +132,23 @@ class MopidyState {
         }
     }
 
+    async skipToTrack(track: AnyTlTrack) {
+        if (!this.#base.tracklist || !this.#base.playback) return;
+
+        try {
+            const tlid = this.#normalizeTlIDs(track);
+
+            if (tlid.length !== 1) return;
+
+            await this.#base.playback.play({
+                tlid: tlid[0],
+            });
+        } catch (e: unknown) {
+            console.error("Failed to skip to track");
+            console.error(e);
+        }
+    }
+
     #normalizeTlIDs(tracks: AnyTlTrack | AnyTlTracks) {
         const trackArray = Array.isArray(tracks)
             ? tracks
@@ -881,12 +898,12 @@ class MopidyState {
             }
 
             if (response.syncedLyrics) {
-            const pattern = /\[(\d+):(\d+).(\d+)\]\s*(.*)/;
+                const pattern = /\[(\d+):(\d+).(\d+)\]\s*(.*)/;
 
                 for (const line of response.syncedLyrics.split("\n")) {
-                const match = line.match(pattern);
+                    const match = line.match(pattern);
 
-                if (match) {
+                    if (match) {
                         const [, m, s, cs, lyricsLine] = match;
 
                         lyrics.timed.push({
@@ -898,7 +915,7 @@ class MopidyState {
                         });
                     }
                 }
-                }
+            }
 
             this.#lyrics.set(track.uri, lyrics);
             return lyrics;

@@ -13,6 +13,6 @@
     > = $props();
 </script>
 
-<Link path="directory" uri={directory.uri ?? undefined} {...props}>
+<Link path="library" uri={directory.uri ?? undefined} {...props}>
     {directory.name}
 </Link>

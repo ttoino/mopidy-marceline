@@ -3,10 +3,10 @@
 
     import {
         Button,
+        StandardButtonGroup,
+        Icon,
         IconButton,
         Menu,
-        MenuList,
-        MenuTrigger,
     } from "svelte-m3c";
 
     import MenuAction from "./MenuAction.svelte";
@@ -42,45 +42,41 @@
     });
 </script>
 
-<div class="flex flex-row items-center gap-2">
+<StandardButtonGroup variant="tonal" color="secondary">
     {#each actions as action, index (index)}
         {#if !alwaysHidden.includes(index) && action !== "divider" && "action" in action}
             <Button
-                containerClass={!(alwaysVisible.includes(index))
+                containerClass={!alwaysVisible.includes(index)
                     ? "max-medium:hidden"
                     : ""}
-                icon={action.icon}
                 onclick={action.action}
-                variant={alwaysVisible.includes(index) ? "filled" : "text"}
+                variant={alwaysVisible.includes(index) ? "filled" : undefined}
+                color={alwaysVisible.includes(index) ? "primary" : undefined}
             >
+                <Icon icon={action.icon} />
                 {action.label}
             </Button>
         {/if}
     {/each}
 
-    <Menu type="dropdown">
-        <MenuTrigger>
-            {#snippet child({ props })}
-                <IconButton
-                    containerClass={alwaysHidden.length === 0
-                        ? "medium:hidden"
-                        : ""}
-                    icon="more_horiz"
-                    {...props}
+    <Menu strategy="dropdown">
+        {#snippet trigger({ props })}
+            <IconButton
+                containerClass={alwaysHidden.length === 0
+                    ? "medium:hidden"
+                    : ""}
+                icon="keyboard_arrow_down"
+                {...props}
+            />
+        {/snippet}
+
+        {#each actions as action, index (index)}
+            {#if !(index in alwaysVisible)}
+                <MenuAction
+                    class={!alwaysHidden.includes(index) ? "medium:hidden" : ""}
+                    {action}
                 />
-            {/snippet}
-        </MenuTrigger>
-        <MenuList>
-            {#each actions as action, index (index)}
-                {#if !(index in alwaysVisible)}
-                    <MenuAction
-                        class={!alwaysHidden.includes(index)
-                            ? "medium:hidden"
-                            : ""}
-                        {action}
-                    />
-                {/if}
-            {/each}
-        </MenuList>
+            {/if}
+        {/each}
     </Menu>
-</div>
+</StandardButtonGroup>

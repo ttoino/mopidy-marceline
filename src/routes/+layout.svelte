@@ -25,7 +25,7 @@
 <Provider>
     <div
         style={palette}
-        class="flex h-full flex-col bg-surface text-on-surface palette"
+        class="flex h-full flex-col bg-surface text-on-surface"
     >
         <div class="flex h-full flex-row pb-20">
             <Navigation />

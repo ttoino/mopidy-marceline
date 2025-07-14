@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { Track } from "$lib/types/mopidy";
+    import type { ComponentProps } from "svelte";
 
     import { getMopidy } from "$lib/context/mopidy";
     import { Tooltip } from "svelte-m3c";
@@ -8,9 +9,10 @@
 
     let {
         track,
+        ...props
     }: {
         track: Track;
-    } = $props();
+    } & Omit<ComponentProps<typeof Tooltip>, "children" | "variant"> = $props();
 
     const mopidy = getMopidy();
 
@@ -24,12 +26,12 @@
     });
 </script>
 
-<!-- FIXME: See why this div is needed -->
-<div style={palette} class="contents palette">
-    <!-- FIXME: Use rich tooltip when implemented -->
-    <Tooltip
-        class="rounded-md bg-surface-container p-2 text-on-surface-variant shadow-2"
-    >
-        <TrackInfo {track} />
-    </Tooltip>
-</div>
+<!-- FIXME: palette doesn't work -->
+<Tooltip
+    style={palette}
+    class="rounded-md bg-surface-container p-2 text-on-surface-variant shadow-2"
+    variant="rich"
+    {...props}
+>
+    <TrackInfo {track} />
+</Tooltip>

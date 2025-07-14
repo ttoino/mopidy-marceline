@@ -5,6 +5,7 @@
     import { SEPARATOR } from "$lib/constants";
     import { getMopidy } from "$lib/context/mopidy";
     import { formatDuration } from "$lib/format";
+    import { hashToNumber } from "$lib/hash";
     import { Icon } from "svelte-m3c";
 
     import trackActions from "../action/trackActions";
@@ -13,12 +14,22 @@
     import TrackLink from "../link/TrackLink.svelte";
     import ListItem from "./ListItem.svelte";
 
+    const shapes = [
+        "mask-shape-sunny",
+        "mask-shape-6-sided-cookie",
+        "mask-shape-7-sided-cookie",
+        "mask-shape-9-sided-cookie",
+        "mask-shape-8-leaf-clover",
+    ] as const;
+
     let {
-        actions: act,
-        leading: lead,
+        actions: baseActions,
+        active: baseActive,
+        leading: baseLeading,
         track,
-        trailing: trail,
+        trailing: baseTrailing,
     }: {
+        active?: boolean;
         track: Track;
     } & Partial<
         Pick<
@@ -29,9 +40,15 @@
 
     const mopidy = getMopidy();
 
-    let actions = $derived(act ?? trackActions(mopidy, track));
+    let actions = $derived(baseActions ?? trackActions(mopidy, track));
 
-    let active = $derived(track.uri === mopidy.currentTrack?.track.uri);
+    let active = $derived(
+        baseActive ?? track.uri === mopidy.currentTrack?.track.uri,
+    );
+
+    let activeShape = $derived(
+        hashToNumber(track.uri).then((n) => shapes[n % shapes.length]),
+    );
 
     let image = $derived(mopidy.getImage(track.uri));
 </script>
@@ -44,14 +61,34 @@
     supportingTextClass={active ? "text-secondary" : ""}
 >
     {#snippet leading()}
-        {@render lead?.()}
+        {@render baseLeading?.()}
 
         {#if image}
-            <img
-                class="aspect-square h-full object-cover"
-                alt="Album cover"
-                src={image}
-            />
+            {#snippet img(shape = "mask-shape-circle")}
+                <div
+                    class="h-full mask-contain mask-no-repeat [animation-duration:5s] {active
+                        ? shape
+                        : 'mask-shape-square'}"
+                    class:[animation-play-state:paused]={mopidy.playbackState !==
+                        "playing"}
+                    class:animate-spin={active}
+                >
+                    <img
+                        class="aspect-square h-full object-cover [animation-direction:reverse] [animation-duration:5s]"
+                        class:[animation-play-state:paused]={mopidy.playbackState !==
+                            "playing"}
+                        class:animate-spin={active}
+                        alt="Album cover"
+                        src={image}
+                    />
+                </div>
+            {/snippet}
+
+            {#await activeShape}
+                {@render img()}
+            {:then shape}
+                {@render img(shape)}
+            {/await}
         {:else}
             <Icon icon="music_note" />
         {/if}
@@ -65,7 +102,7 @@
         <AlbumLink album={track.album} />
     {/snippet}
     {#snippet trailing()}
-        {@render trail?.()}
+        {@render baseTrailing?.()}
 
         {formatDuration(track.length)}
     {/snippet}
