@@ -852,10 +852,14 @@ class MopidyState {
         return this.#lyrics.get(uri);
     }
 
-    async requestLyrics(track: Track) {
-        const uri = track.uri;
+    async requestLyrics(anyTrack: AnyTrack) {
+        const tracks = this.#normalizeTracks(anyTrack);
 
-        if (this.#lyrics.has(uri)) return this.#lyrics.get(uri);
+        if (tracks.length !== 1) return;
+
+        const track = tracks[0];
+
+        if (this.#lyrics.has(track.uri)) return this.#lyrics.get(track.uri);
 
         try {
             const response = await lrclib.get({
@@ -865,34 +869,38 @@ class MopidyState {
                 trackName: track.name,
             });
 
-            if (!response.syncedLyrics) {
-                this.#lyrics.set(uri, []);
-                return [];
+            const lyrics: TrackLyrics = {
+                plain: [],
+                timed: [],
+            };
+
+            if (response.plainLyrics) {
+                lyrics.plain = response.plainLyrics
+                    .split(/\n\n+/)
+                    .map((line) => line.split(/\n/));
             }
 
+            if (response.syncedLyrics) {
             const pattern = /\[(\d+):(\d+).(\d+)\]\s*(.*)/;
 
-            const lyrics = response.syncedLyrics.split("\n").flatMap((line) => {
+                for (const line of response.syncedLyrics.split("\n")) {
                 const match = line.match(pattern);
 
                 if (match) {
-                    const [, m, s, cs, lyrics] = match;
+                        const [, m, s, cs, lyricsLine] = match;
 
-                    return [
-                        {
-                            lyrics,
+                        lyrics.timed.push({
+                            text: lyricsLine,
                             timestamp:
                                 10 *
                                 (parseInt(cs) +
                                     100 * (parseInt(s) + 60 * parseInt(m))),
-                        },
-                    ];
+                        });
+                    }
+                }
                 }
 
-                return [];
-            });
-
-            this.#lyrics.set(uri, lyrics);
+            this.#lyrics.set(track.uri, lyrics);
             return lyrics;
         } catch (e: unknown) {
             console.error("Failed to get lyrics");

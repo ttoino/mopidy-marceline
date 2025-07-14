@@ -136,9 +136,12 @@ export type Track = Override<
 >;
 
 export type TrackLyrics = {
-    lyrics: string;
-    timestamp: number;
-}[];
+    plain: string[][];
+    timed: {
+        text: string;
+        timestamp: number;
+    }[];
+};
 
 export function model(ref: Mopidy.models.Ref<"album">): AlbumRef;
 export function model(ref: Mopidy.models.Ref<"artist">): ArtistRef;

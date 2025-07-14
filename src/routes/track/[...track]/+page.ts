@@ -10,10 +10,13 @@ export const load: PageLoad = async ({ params, parent }) => {
 
     if (!track) error(404, "Track not found");
 
+    const lyrics = await mopidy.requestLyrics(track);
+
     const image = (await mopidy.requestImages([track.uri]))?.at(0);
     const palette = image ? await mopidy.requestPalette(image) : undefined;
 
     return {
+        lyrics,
         palette,
         track,
     };

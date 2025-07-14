@@ -19,9 +19,9 @@
 
 <div class="flex flex-col items-stretch gap-8 p-4 pt-8 medium:flex-row">
     {#if image}
-        <img class="h-auto w-full max-w-100" alt="" src={image} />
+        <img class="h-auto w-full max-w-100 shrink-0 grow" alt="" src={image} />
     {/if}
-    <div class="flex flex-col justify-center">
+    <div class="flex flex-col justify-center items-start">
         <h1 class="text-display-l">
             {@render title()}
         </h1>
