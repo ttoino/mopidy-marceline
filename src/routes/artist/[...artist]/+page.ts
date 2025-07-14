@@ -10,11 +10,27 @@ export const load: PageLoad = async ({ params, parent }) => {
 
     if (!artist) error(404, "Artist not found");
 
-    const image = (await mopidy.requestImages([artist.uri]))?.at(0);
+    const tracks = mopidy.tracks.filter(
+        (track) =>
+            !track.album.artists.some((a) => a.uri === artist.uri) &&
+            [
+                ...(track.artists ?? []),
+                ...(track.composers ?? []),
+                ...(track.performers ?? []),
+            ].some((a) => a.uri === artist.uri),
+    );
+
+    const image = (
+        await mopidy.requestImages([
+            artist.uri,
+            ...tracks.map((track) => track.uri),
+        ])
+    )?.at(0);
     const palette = image ? await mopidy.requestPalette(image) : undefined;
 
     return {
         artist,
         palette,
+        tracks,
     };
 };
