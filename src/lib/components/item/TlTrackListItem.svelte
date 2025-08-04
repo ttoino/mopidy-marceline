@@ -2,19 +2,23 @@
     import type { TlTrack } from "$lib/types/mopidy";
 
     import { getMopidy } from "$lib/context/mopidy";
+    import { Checkbox } from "svelte-m3c";
 
     import tlTrackActions from "../action/tlTrackActions";
     import TrackListItem from "./TrackListItem.svelte";
-    import { Checkbox } from "svelte-m3c";
 
     let {
-        track,
-        selecting = false,
+        index: baseIndex,
+        maxIndex: baseMaxIndex,
         selected = $bindable(false),
+        selecting = false,
+        track,
     }: {
-        track: TlTrack;
-        selecting?: boolean;
+        index?: number;
+        maxIndex?: number;
         selected?: boolean;
+        selecting?: boolean;
+        track: TlTrack;
     } = $props();
 
     const mopidy = getMopidy();
@@ -24,33 +28,27 @@
     let active = $derived(track.tlid === mopidy.currentTrack?.tlid);
 
     let index = $derived(
-        mopidy.queue.findIndex((t) => t.tlid === track.tlid) + 1,
+        baseIndex ?? mopidy.queue.findIndex((t) => t.tlid === track.tlid) + 1,
     );
 
-    let maxIndex = $derived(mopidy.queue.length + 1);
+    let maxIndex = $derived(baseMaxIndex ?? mopidy.queue.length + 1);
 </script>
 
-<TrackListItem {actions} {active} track={track.track}>
+<TrackListItem
+    {actions}
+    {active}
+    {index}
+    indexClass={!selecting ? "group-hover/list-item:opacity-0" : "opacity-0"}
+    {maxIndex}
+    track={track.track}
+>
     {#snippet leading()}
-        <span
-            class="inline-grid grid-cols-1 grid-rows-1 justify-items-end *:col-span-full *:row-span-full"
-        >
-            <span
-                class="transition-opacity {!selecting
-                    ? 'group-hover/list-item:opacity-0'
-                    : 'opacity-0'}">{index}</span
-            >
-            <span class="pointer-events-none opacity-0" aria-hidden="true"
-                >{maxIndex}</span
-            >
-
-            <Checkbox
-                bind:checked={selected}
-                containerClass="transition-opacity {!selecting
-                    ? "group-[&:not(:hover)]/list-item:opacity-0"
-                    : ""}"
-                stateLayerClass="z-20"
-            />
-        </span>
+        <Checkbox
+            containerClass="transition-opacity {!selecting
+                ? 'group-[&:not(:hover)]/list-item:opacity-0'
+                : ''}"
+            stateLayerClass="z-20"
+            bind:checked={selected}
+        />
     {/snippet}
 </TrackListItem>

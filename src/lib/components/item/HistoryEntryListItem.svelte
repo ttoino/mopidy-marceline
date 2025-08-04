@@ -3,16 +3,20 @@
 
     import { SEPARATOR } from "$lib/constants";
     import { getMopidy } from "$lib/context/mopidy";
-    import { formatDate, formatDateRelative } from "$lib/format";
+    import { formatDateRelative, formatDateTime } from "$lib/format";
     import { Tooltip } from "svelte-m3c";
 
     import TrackListItem from "./TrackListItem.svelte";
 
     let {
         entry,
+        index,
+        maxIndex,
         ...props
     }: {
         entry: HistoryEntry;
+        index?: number;
+        maxIndex?: number;
     } = $props();
 
     const mopidy = getMopidy();
@@ -21,7 +25,7 @@
 </script>
 
 {#if track}
-    <TrackListItem {track} {...props}>
+    <TrackListItem {index} {maxIndex} {track} {...props}>
         {#snippet trailing()}
             <Tooltip>
                 {#snippet trigger({ props })}
@@ -33,7 +37,7 @@
                     </span>
                 {/snippet}
 
-                {formatDate(entry.timestamp)}
+                {formatDateTime(entry.timestamp)}
             </Tooltip>
 
             <span>{SEPARATOR}</span>

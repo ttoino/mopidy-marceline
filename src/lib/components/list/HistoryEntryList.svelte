@@ -11,7 +11,11 @@
     data={entries}
     getKey={(entry) => `${entry.track.uri} ${entry.timestamp.getTime()}`}
 >
-    {#snippet item(entry)}
-        <HistoryEntryListItem {entry} />
+    {#snippet item(entry, index)}
+        <HistoryEntryListItem
+            {entry}
+            index={index + 1}
+            maxIndex={entries.length}
+        />
     {/snippet}
 </VirtualList>

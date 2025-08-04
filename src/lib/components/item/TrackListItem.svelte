@@ -25,11 +25,19 @@
     let {
         actions: baseActions,
         active: baseActive,
+        index: baseIndex,
+        indexClass,
         leading: baseLeading,
+        maxIndex: baseMaxIndex,
+        maxIndexClass,
         track,
         trailing: baseTrailing,
     }: {
         active?: boolean;
+        index?: number;
+        indexClass?: string;
+        maxIndex?: number;
+        maxIndexClass?: string;
         track: Track;
     } & Partial<
         Pick<
@@ -37,6 +45,9 @@
             "actions" | "leading" | "trailing"
         >
     > = $props();
+
+    let index = $derived(baseIndex ?? track.track_no);
+    let maxIndex = $derived(baseMaxIndex ?? track.album.num_tracks);
 
     const mopidy = getMopidy();
 
@@ -61,7 +72,17 @@
     supportingTextClass={active ? "text-secondary" : ""}
 >
     {#snippet leading()}
-        {@render baseLeading?.()}
+        <span
+            class="inline-grid grid-cols-1 grid-rows-1 justify-items-end *:col-span-full *:row-span-full"
+        >
+            <span class="transition-opacity {indexClass}">{index}</span>
+            <span
+                class="pointer-events-none opacity-0 {maxIndexClass}"
+                aria-hidden="true">{maxIndex}</span
+            >
+
+            {@render baseLeading?.()}
+        </span>
 
         {#if image}
             {#snippet img(shape = "mask-shape-circle")}
