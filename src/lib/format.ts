@@ -1,5 +1,6 @@
 const durationFormat = new Intl.DurationFormat("en", {
     fractionalDigits: 0,
+    hours: "numeric",
     hoursDisplay: "auto",
     minutes: "numeric",
     minutesDisplay: "always",
@@ -8,6 +9,10 @@ const durationFormat = new Intl.DurationFormat("en", {
 });
 
 const dateFormat = new Intl.DateTimeFormat("en", {
+    dateStyle: "long",
+});
+
+const dateTimeFormat = new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeStyle: "short",
 });
@@ -19,11 +24,14 @@ const dateRelativeFormat = new Intl.RelativeTimeFormat("en", {
 
 export const formatDuration = (duration: number) =>
     durationFormat.format({
+        hours: Math.floor(duration / 3600000),
         milliseconds: duration % 60000,
-        minutes: Math.floor(duration / 60000),
+        minutes: Math.floor(duration / 60000) % 60,
     });
 
 export const formatDate = (date: Date) => dateFormat.format(date);
+
+export const formatDateTime = (date: Date) => dateTimeFormat.format(date);
 
 export const formatDateRelative = (date: Date, to = new Date()) => {
     const format = (value: number, unit: Intl.RelativeTimeFormatUnit) =>

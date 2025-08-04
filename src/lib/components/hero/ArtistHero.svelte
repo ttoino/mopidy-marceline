@@ -17,10 +17,8 @@
     let image = $derived(mopidy.getImage(artist.uri));
 </script>
 
-<Hero actions={[]} {image}>
+<Hero {image}>
     {#snippet title()}
         <ArtistLink {artist} />
     {/snippet}
-
-    {#snippet subtitle()}{/snippet}
 </Hero>
