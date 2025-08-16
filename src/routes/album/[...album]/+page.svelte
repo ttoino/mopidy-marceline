@@ -27,7 +27,7 @@
 <AlbumHero album={data.album} />
 
 <div class="flex flex-col gap-4">
-    {#each discs as disc}
+    {#each discs as disc, index (index)}
         {#if data.album.num_discs > 1}
             <h2 class="px-4 text-display-s">Disc {disc[0].disc_no}</h2>
         {/if}

@@ -62,8 +62,11 @@ export default ts.config(
             ],
             "svelte/experimental-require-strict-events": "off",
             "svelte/no-inline-styles": "off",
+            "svelte/no-top-level-browser-globals": "off",
             "svelte/no-unused-class-name": "off",
+            "svelte/require-event-prefix": "off",
             "svelte/require-optimized-style-attribute": "off",
+            "svelte/valid-compile": "off",
         },
     },
     {
