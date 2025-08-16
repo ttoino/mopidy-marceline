@@ -4,7 +4,7 @@ export type LRCLibResponse = {
     duration: number;
     id: number;
     instrumental: boolean;
-    plainLyrics: string;
-    syncedLyrics: string;
+    plainLyrics: null | string;
+    syncedLyrics: null | string;
     trackName: string;
 };

@@ -3,9 +3,9 @@
     import { formatDuration } from "$lib/format";
     import { mergeProps, Popover } from "bits-ui";
     import {
-        StandardButtonGroup,
         IconButton,
         Slider,
+        StandardButtonGroup,
         ToggleIconButton,
         Tooltip,
     } from "svelte-m3c";
@@ -25,7 +25,7 @@
     {#if mopidy.currentTrack}
         <TrackInfo track={mopidy.currentTrack.track} />
 
-        <StandardButtonGroup variant="tonal" color="secondary" width="narrow">
+        <StandardButtonGroup color="secondary" variant="tonal" width="narrow">
             {#snippet prev({ props })}
                 <IconButton
                     icon="skip_previous"
@@ -43,12 +43,12 @@
                 <Tooltip trigger={prev}>Previous track</Tooltip>
             {/if}
             <IconButton
+                color="primary"
                 icon={mopidy.playbackState === "playing"
                     ? "pause"
                     : "play_arrow"}
                 onclick={() => mopidy.togglePlaybackState()}
                 variant="filled"
-                color="primary"
                 width="wide"
             />
             {#snippet next({ props })}
@@ -72,8 +72,8 @@
                     {formatDuration(mopidy.timePosition)}
                 </span>
                 <Slider
-                    containerClass="!min-w-auto grow"
                     collapsible
+                    containerClass="!min-w-auto grow"
                     max={mopidy.currentTrack.track.length / 1000}
                     onValueCommit={(timePosition: number) => {
                         mopidy.timePosition = timePosition * 1000;

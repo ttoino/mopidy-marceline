@@ -22,22 +22,22 @@
     </MenuItem>
 {:else}
     <Menu>
-        {#snippet trigger({props})}
-        <MenuItem containerClass={className} {...props}>
-            {#snippet text()}
-                {action.label}
-            {/snippet}
-            {#snippet leading()}
-                <Icon icon={action.icon} />
-            {/snippet}
-            {#snippet trailing()}
-                <Icon icon="arrow_right" />
-            {/snippet}
-        </MenuItem>
+        {#snippet trigger({ props })}
+            <MenuItem containerClass={className} {...props}>
+                {#snippet text()}
+                    {action.label}
+                {/snippet}
+                {#snippet leading()}
+                    <Icon icon={action.icon} />
+                {/snippet}
+                {#snippet trailing()}
+                    <Icon icon="arrow_right" />
+                {/snippet}
+            </MenuItem>
         {/snippet}
 
-            {#each action.actions as subAction, index (index)}
-                <MenuAction action={subAction} />
-            {/each}
+        {#each action.actions as subAction, index (index)}
+            <MenuAction action={subAction} />
+        {/each}
     </Menu>
 {/if}

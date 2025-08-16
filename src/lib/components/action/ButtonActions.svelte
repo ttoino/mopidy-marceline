@@ -3,10 +3,10 @@
 
     import {
         Button,
-        StandardButtonGroup,
         Icon,
         IconButton,
         Menu,
+        StandardButtonGroup,
     } from "svelte-m3c";
 
     import MenuAction from "./MenuAction.svelte";
@@ -42,16 +42,16 @@
     });
 </script>
 
-<StandardButtonGroup variant="tonal" color="secondary">
+<StandardButtonGroup color="secondary" variant="tonal">
     {#each actions as action, index (index)}
         {#if !alwaysHidden.includes(index) && action !== "divider" && "action" in action}
             <Button
+                color={alwaysVisible.includes(index) ? "primary" : undefined}
                 containerClass={!alwaysVisible.includes(index)
                     ? "max-medium:hidden"
                     : ""}
                 onclick={action.action}
                 variant={alwaysVisible.includes(index) ? "filled" : undefined}
-                color={alwaysVisible.includes(index) ? "primary" : undefined}
             >
                 <Icon icon={action.icon} />
                 {action.label}

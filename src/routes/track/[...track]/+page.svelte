@@ -11,7 +11,7 @@
 
 <TrackHero track={data.track} />
 
-{#if data.lyrics}
+{#if data.lyrics && data.lyrics.plain.length > 0}
     <div class="mx-4">
         <h2 class="mb-4 text-display-m">Lyrics</h2>
 
