@@ -13,18 +13,20 @@
 
 {#if data.lyrics && data.lyrics.plain.length > 0}
     <div class="mx-4">
-        <h2 class="mb-4 text-display-m">Lyrics</h2>
+        <h2 class="text-display-m mb-4">Lyrics</h2>
 
-        {#each data.lyrics.plain as group, i (i)}
-            <p class="mb-4 text-body-l">
-                {#each group as line, j (j)}
-                    {#if j > 0}
-                        <br />
-                    {/if}
+        <div class="columns-[40ch]">
+            {#each data.lyrics.plain as group, i (i)}
+                <p class="text-body-l mb-4 break-inside-avoid">
+                    {#each group as line, j (j)}
+                        {#if j > 0}
+                            <br />
+                        {/if}
 
-                    {line}
-                {/each}
-            </p>
-        {/each}
+                        {line}
+                    {/each}
+                </p>
+            {/each}
+        </div>
     </div>
 {/if}
