@@ -1,10 +1,10 @@
-import type { MaterialSymbol } from "material-symbols";
+import type { IconName } from "svelte-m3c";
 
 export type Action = ActionGroup | BaseAction | Divider;
 
 export type ActionGroup = {
     actions: BaseAction[];
-    icon: MaterialSymbol;
+    icon: IconName;
     label: string;
 };
 
@@ -12,7 +12,7 @@ export type Actions = Action[];
 
 export type BaseAction = {
     action: () => void;
-    icon: MaterialSymbol;
+    icon: IconName;
     label: string;
 };
 

@@ -1,8 +1,7 @@
 <script lang="ts">
-    import type { MaterialSymbol } from "material-symbols";
     import type { Snippet } from "svelte";
 
-    import { Icon, Tooltip } from "svelte-m3c";
+    import { Icon, type IconName, Tooltip } from "svelte-m3c";
 
     let {
         children,
@@ -10,7 +9,7 @@
         tooltip,
     }: {
         children: Snippet;
-        icon?: MaterialSymbol;
+        icon?: IconName;
         tooltip?: string;
     } = $props();
 </script>
