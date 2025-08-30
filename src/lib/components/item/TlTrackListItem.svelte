@@ -8,8 +8,8 @@
     import TrackListItem from "./TrackListItem.svelte";
 
     let {
-        index: baseIndex,
-        maxIndex: baseMaxIndex,
+        index,
+        maxIndex,
         selected = $bindable(false),
         selecting = false,
         track,
@@ -26,12 +26,6 @@
     let actions = $derived(tlTrackActions(mopidy, track));
 
     let active = $derived(track.tlid === mopidy.currentTrack?.tlid);
-
-    let index = $derived(
-        baseIndex ?? mopidy.queue.findIndex((t) => t.tlid === track.tlid) + 1,
-    );
-
-    let maxIndex = $derived(baseMaxIndex ?? mopidy.queue.length + 1);
 </script>
 
 <TrackListItem

@@ -25,10 +25,10 @@
     let {
         actions: baseActions,
         active: baseActive,
-        index: baseIndex,
+        index,
         indexClass,
         leading: baseLeading,
-        maxIndex: baseMaxIndex,
+        maxIndex,
         maxIndexClass,
         track,
         trailing: baseTrailing,
@@ -45,9 +45,6 @@
             "actions" | "leading" | "trailing"
         >
     > = $props();
-
-    let index = $derived(baseIndex ?? track.track_no);
-    let maxIndex = $derived(baseMaxIndex ?? track.album.num_tracks);
 
     const mopidy = getMopidy();
 
@@ -72,17 +69,21 @@
     supportingTextClass={active ? "text-secondary" : ""}
 >
     {#snippet leading()}
-        <span
-            class="inline-grid grid-cols-1 grid-rows-1 justify-items-end *:col-span-full *:row-span-full"
-        >
-            <span class="transition-opacity {indexClass}">{index}</span>
+        {#if index !== undefined}
             <span
-                class="pointer-events-none opacity-0 {maxIndexClass}"
-                aria-hidden="true">{maxIndex}</span
+                class="inline-grid grid-cols-1 grid-rows-1 justify-items-end *:col-span-full *:row-span-full"
             >
+                <span class="transition-opacity {indexClass}">{index}</span>
+                {#if maxIndex !== undefined}
+                    <span
+                        class="pointer-events-none opacity-0 {maxIndexClass}"
+                        aria-hidden="true">{maxIndex}</span
+                    >
+                {/if}
 
-            {@render baseLeading?.()}
-        </span>
+                {@render baseLeading?.()}
+            </span>
+        {/if}
 
         {#if image}
             {#snippet img(shape = "mask-shape-circle")}

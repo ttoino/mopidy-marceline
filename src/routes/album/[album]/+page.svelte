@@ -32,6 +32,6 @@
             <h2 class="px-4 text-display-s">Disc {disc[0].disc_no}</h2>
         {/if}
 
-        <TrackList tracks={disc} />
+        <TrackList numbered tracks={disc} />
     {/each}
 </div>
