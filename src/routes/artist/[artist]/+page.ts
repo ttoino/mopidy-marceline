@@ -1,4 +1,7 @@
+import type { ModelRef } from "$lib/types/mopidy";
+
 import { error } from "@sveltejs/kit";
+import { sortByDate } from "$lib/sort";
 import { brand } from "$lib/types/brand";
 
 import type { PageLoad } from "./$types";
@@ -20,6 +23,15 @@ export const load: PageLoad = async ({ params, parent }) => {
             ].some((a) => a.uri === artist.uri),
     );
 
+    const items = sortByDate([...artist.albums, ...tracks]).map(
+        (item) =>
+            ({
+                name: item.name,
+                type: "album" in item ? "track" : "album",
+                uri: item.uri,
+            }) as ModelRef,
+    );
+
     const image = (
         await mopidy.requestImages([
             artist.uri,
@@ -30,7 +42,7 @@ export const load: PageLoad = async ({ params, parent }) => {
 
     return {
         artist,
+        items,
         palette,
-        tracks,
     };
 };
