@@ -4,7 +4,7 @@
     import { getMopidy } from "$lib/context/mopidy";
     import { formatDate, formatDuration } from "$lib/format";
 
-    import tracksActions from "../action/tracksActions";
+    import albumActions from "../action/albumActions";
     import AlbumLink from "../link/AlbumLink.svelte";
     import ArtistsLinks from "../link/ArtistsLinks.svelte";
     import Hero from "./Hero.svelte";
@@ -20,7 +20,7 @@
 
     let image = $derived(mopidy.getImage(album.uri));
 
-    let actions = $derived(tracksActions(mopidy, album.tracks));
+    let actions = $derived(albumActions(mopidy, album));
 </script>
 
 <Hero {actions} {image}>

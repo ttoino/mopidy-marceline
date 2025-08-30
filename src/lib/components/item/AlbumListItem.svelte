@@ -4,7 +4,7 @@
     import { getMopidy } from "$lib/context/mopidy";
     import { Icon } from "svelte-m3c";
 
-    import tracksActions from "../action/tracksActions";
+    import albumActions from "../action/albumActions";
     import AlbumLink from "../link/AlbumLink.svelte";
     import ArtistsLinks from "../link/ArtistsLinks.svelte";
     import ListItem from "./ListItem.svelte";
@@ -17,7 +17,7 @@
 
     const mopidy = getMopidy();
 
-    let actions = $derived(tracksActions(mopidy, album.tracks));
+    let actions = $derived(albumActions(mopidy, album));
 
     let image = $derived(mopidy.getImage(album.uri));
 
