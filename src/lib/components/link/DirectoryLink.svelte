@@ -9,10 +9,14 @@
         ...props
     }: { directory: Directory } & Omit<
         ComponentProps<typeof Link>,
-        "children" | "path" | "uri"
+        "children" | "params" | "path"
     > = $props();
 </script>
 
-<Link path="library" uri={directory.uri ?? undefined} {...props}>
+<Link
+    params={{ directory: directory.uri ?? "" }}
+    path="/library/[directory]"
+    {...props}
+>
     {directory.name}
 </Link>

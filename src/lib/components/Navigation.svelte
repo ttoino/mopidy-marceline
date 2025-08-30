@@ -46,8 +46,8 @@
 </script>
 
 <script lang="ts">
-    import { base } from "$app/paths";
     import { page } from "$app/state";
+    import { resolve } from "$lib/navigation";
     import {
         NavigationDrawer,
         NavigationDrawerItem,
@@ -66,7 +66,7 @@
     {#each destinations as { href, icon, label }, index (index)}
         <NavigationDrawerItem
             active={index === active}
-            href="{base}{href}"
+            href={resolve(href)}
             {icon}
         >
             {label}
@@ -78,7 +78,7 @@
     {#each destinations as { href, icon, label }, index (index)}
         <NavigationRailItem
             active={index === active}
-            href="{base}{href}"
+            href={resolve(href)}
             {icon}
         >
             {label}

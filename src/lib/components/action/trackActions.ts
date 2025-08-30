@@ -3,7 +3,7 @@ import type { Actions } from "$lib/types/action";
 import type { AnyTracks, Track } from "$lib/types/mopidy";
 
 import { goto } from "$app/navigation";
-import { base } from "$app/paths";
+import { resolve } from "$lib/navigation";
 
 import tracksActions from "./tracksActions";
 
@@ -11,19 +11,32 @@ export default (mopidy: MopidyState, track: Track): Actions => [
     ...tracksActions(mopidy, [track] as AnyTracks),
     "divider",
     {
-        action: () => goto(`${base}/track/${encodeURIComponent(track.uri)}`),
+        action: () =>
+            goto(
+                resolve("/track/[track]", {
+                    track: track.uri,
+                }),
+            ),
         icon: "music_note",
         label: "Go to track",
     },
     {
         action: () =>
-            goto(`${base}/artist/${encodeURIComponent(track.artists[0].uri)}`),
+            goto(
+                resolve("/artist/[artist]", {
+                    artist: track.artists[0].uri,
+                }),
+            ),
         icon: "artist",
         label: "Go to artist",
     },
     {
         action: () =>
-            goto(`${base}/album/${encodeURIComponent(track.album.uri)}`),
+            goto(
+                resolve("/album/[album]", {
+                    album: track.album.uri,
+                }),
+            ),
         icon: "album",
         label: "Go to album",
     },

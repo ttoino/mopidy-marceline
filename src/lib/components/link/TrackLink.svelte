@@ -9,10 +9,10 @@
         ...props
     }: { track: Track } & Omit<
         ComponentProps<typeof Link>,
-        "children" | "path" | "uri"
+        "children" | "params" | "path"
     > = $props();
 </script>
 
-<Link path="track" uri={track.uri} {...props}>
+<Link params={{ track: track.uri }} path="/track/[track]" {...props}>
     {track.name}
 </Link>

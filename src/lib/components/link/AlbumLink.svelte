@@ -9,10 +9,10 @@
         ...props
     }: { album: Album } & Omit<
         ComponentProps<typeof Link>,
-        "children" | "path" | "uri"
+        "children" | "params" | "path"
     > = $props();
 </script>
 
-<Link path="album" uri={album.uri} {...props}>
+<Link params={{ album: album.uri }} path="/album/[album]" {...props}>
     {album.name}
 </Link>

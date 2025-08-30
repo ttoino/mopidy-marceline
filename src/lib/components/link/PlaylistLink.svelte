@@ -9,10 +9,14 @@
         ...props
     }: { playlist: Playlist } & Omit<
         ComponentProps<typeof Link>,
-        "children" | "path" | "uri"
+        "children" | "params" | "path"
     > = $props();
 </script>
 
-<Link path="playlist" uri={playlist.uri} {...props}>
+<Link
+    params={{ playlist: playlist.uri }}
+    path="/playlist/[playlist]"
+    {...props}
+>
     {playlist.name}
 </Link>

@@ -1,30 +1,28 @@
-<script lang="ts">
+<script generics="T extends Pathname | RouteId" lang="ts">
+    import type { Pathname, RouteId, RouteParams } from "$app/types";
     import type { HTMLAnchorAttributes } from "svelte/elements";
 
-    import { base } from "$app/paths";
+    import { resolve } from "$lib/navigation";
 
     let {
         children,
         class: className,
         contained = true,
+        params,
         path,
-        uri,
         ...props
     }: {
         contained?: boolean;
-        path?: string;
-        uri?: string;
+        params: T extends RouteId
+            ? RouteParams<T> extends Record<string, never>
+                ? undefined
+                : RouteParams<T>
+            : undefined;
+        path: T;
     } & Omit<HTMLAnchorAttributes, "href"> = $props();
 
-    let href = $derived.by(() => {
-        let url = base;
-
-        if (path) url += "/" + path;
-
-        if (uri) url += "/" + encodeURIComponent(uri);
-
-        return url;
-    });
+    // @ts-expect-error: Generics don't work here
+    let href = $derived(resolve(path, params));
 </script>
 
 <a
