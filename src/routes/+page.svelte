@@ -1,13 +1,12 @@
 <script lang="ts">
     import type { TlTrack } from "$lib/types/mopidy";
 
-    import ButtonActions from "$lib/components/action/ButtonActions.svelte";
     import queueActions from "$lib/components/action/queueActions";
     import tlTracksActions from "$lib/components/action/tlTracksActions";
+    import Hero from "$lib/components/hero/Hero.svelte";
     import TlTrackList from "$lib/components/list/TlTrackList.svelte";
     import Title from "$lib/components/Title.svelte";
     import { getMopidy } from "$lib/context/mopidy";
-    import { Checkbox } from "svelte-m3c";
     import { SvelteSet } from "svelte/reactivity";
 
     const mopidy = getMopidy();
@@ -27,9 +26,15 @@
     <Title text={mopidy.currentTrack?.track.name ?? "Queue"} />
 </svelte:head>
 
-<div class="flex flex-row items-center gap-2 px-4 pt-5 pb-2">
+<Hero actions={selected.size == 0 ? actions : selectedActions}>
+    {#snippet title()}Queue{/snippet}
+    {#snippet subtitle()}
+        {mopidy.queue.length} track{mopidy.queue.length === 1 ? "" : "s"}
+    {/snippet}
+</Hero>
+
+<!-- <div class="flex flex-row items-center gap-2 px-4 pt-5 pb-2">
     <span class="flex shrink-0 grow flex-row items-center gap-2">
-        <!-- TODO: Better spacing (align with list) -->
         <Checkbox
             checked={selected.size == mopidy.queue.length}
             containerClass={selected.size == 0 ? "hidden" : ""}
@@ -39,6 +44,6 @@
     </span>
 
     <ButtonActions actions={selected.size == 0 ? actions : selectedActions} />
-</div>
+</div> -->
 
 <TlTrackList tracks={mopidy.queue} bind:selected />

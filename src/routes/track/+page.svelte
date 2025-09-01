@@ -1,6 +1,6 @@
 <script lang="ts">
-    import ButtonActions from "$lib/components/action/ButtonActions.svelte";
     import tracksActions from "$lib/components/action/tracksActions.js";
+    import Hero from "$lib/components/hero/Hero.svelte";
     import TrackList from "$lib/components/list/TrackList.svelte";
     import Title from "$lib/components/Title.svelte";
     import { getMopidy } from "$lib/context/mopidy.js";
@@ -13,13 +13,14 @@
 </script>
 
 <svelte:head>
-    <Title text="All tracks" />
+    <Title text="Tracks" />
 </svelte:head>
 
-<div class="flex flex-row items-center gap-2 px-4 pt-5 pb-2">
-    <h1 class="shrink-0 grow text-display-l">All tracks</h1>
-
-    <ButtonActions {actions} />
-</div>
+<Hero {actions}>
+    {#snippet title()}All tracks{/snippet}
+    {#snippet subtitle()}
+        {data.tracks.length} track{data.tracks.length === 1 ? "" : "s"}
+    {/snippet}
+</Hero>
 
 <TrackList tracks={data.tracks} />

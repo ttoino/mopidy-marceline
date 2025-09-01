@@ -23,7 +23,7 @@
     {#if image}
         <img class="h-auto w-full max-w-100 shrink-0 grow" alt="" src={image} />
     {/if}
-    <div class="flex flex-col items-start justify-center">
+    <div class="flex flex-grow flex-col items-start justify-center">
         {#if title}
             <h1 class="text-display-l">
                 {@render title()}
@@ -31,21 +31,26 @@
         {/if}
 
         {#if subtitle}
-            <span class="mb-4 text-display-s text-on-surface-variant">
+            <span class="text-display-s text-on-surface-variant">
                 {@render subtitle()}
             </span>
         {/if}
 
-        {#if actions && actions.length > 0}
+        {#if image && actions && actions.length > 0}
+            <div class="not-first:h-4"></div>
+
             <ButtonActions {actions} />
         {/if}
 
         {#if info}
             <div
-                class="text-middle mt-8 flex flex-row flex-wrap gap-2 self-stretch text-body-l text-on-surface-variant *:min-w-[calc(50%---spacing(1))]"
+                class="text-middle flex flex-row flex-wrap gap-2 self-stretch text-body-l text-on-surface-variant *:min-w-[calc(50%---spacing(1))] not-first:mt-8"
             >
                 {@render info()}
             </div>
         {/if}
     </div>
+    {#if !image && actions && actions.length > 0}
+        <ButtonActions {actions} />
+    {/if}
 </div>

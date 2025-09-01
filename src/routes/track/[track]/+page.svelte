@@ -17,7 +17,7 @@
 
         <div class="columns-[40ch]">
             {#each data.lyrics.plain as group, i (i)}
-                <p class="text-body-l mb-4 break-inside-avoid">
+                <p class="text-body-l mb-4 not-only:break-inside-avoid">
                     {#each group as line, j (j)}
                         {#if j > 0}
                             <br />
