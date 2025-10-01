@@ -29,7 +29,9 @@
 <Hero actions={selected.size == 0 ? actions : selectedActions}>
     {#snippet title()}Queue{/snippet}
     {#snippet subtitle()}
-        {mopidy.queue.length} track{mopidy.queue.length === 1 ? "" : "s"}
+        {selected.size || mopidy.queue.length}
+        track{(selected.size || mopidy.queue.length) === 1 ? "" : "s"}
+        {selected.size > 0 ? "selected" : ""}
     {/snippet}
 </Hero>
 
