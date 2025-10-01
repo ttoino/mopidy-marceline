@@ -13,11 +13,11 @@
 
 {#if data.lyrics && data.lyrics.plain.length > 0}
     <div class="mx-4">
-        <h2 class="text-display-m mb-4">Lyrics</h2>
+        <h2 class="mb-4 text-display-m">Lyrics</h2>
 
         <div class="columns-[40ch]">
             {#each data.lyrics.plain as group, i (i)}
-                <p class="text-body-l mb-4 not-only:break-inside-avoid">
+                <p class="mb-4 text-body-l not-only:break-inside-avoid">
                     {#each group as line, j (j)}
                         {#if j > 0}
                             <br />
