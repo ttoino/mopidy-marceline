@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type { Artist } from "$lib/types/mopidy";
+    import type { ArtistRef } from "$lib/types/mopidy";
 
     import ArtistListItem from "../item/ArtistListItem.svelte";
     import VirtualList from "./VirtualList.svelte";
 
-    let { artists }: { artists: Artist[] } = $props();
+    let { artists }: { artists: ArtistRef[] } = $props();
 </script>
 
 <VirtualList data={artists} getKey={(artist) => artist.uri}>

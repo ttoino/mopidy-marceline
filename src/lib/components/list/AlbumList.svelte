@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type { Album } from "$lib/types/mopidy";
+    import type { AlbumRef } from "$lib/types/mopidy";
 
     import AlbumListItem from "../item/AlbumListItem.svelte";
     import VirtualList from "./VirtualList.svelte";
 
-    let { albums }: { albums: Album[] } = $props();
+    let { albums }: { albums: AlbumRef[] } = $props();
 </script>
 
 <VirtualList data={albums} getKey={(album) => album.uri}>

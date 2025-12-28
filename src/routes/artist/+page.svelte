@@ -2,8 +2,10 @@
     import Hero from "$lib/components/hero/Hero.svelte";
     import ArtistList from "$lib/components/list/ArtistList.svelte";
     import Title from "$lib/components/Title.svelte";
+    import { getMopidy } from "$lib/context/mopidy";
 
-    let { data } = $props();
+    const mopidy = getMopidy();
+    const artists = await mopidy.artists;
 </script>
 
 <svelte:head>
@@ -13,8 +15,8 @@
 <Hero>
     {#snippet title()}All artists{/snippet}
     {#snippet subtitle()}
-        {data.artists.length} artist{data.artists.length === 1 ? "" : "s"}
+        {artists.length} artist{artists.length === 1 ? "" : "s"}
     {/snippet}
 </Hero>
 
-<ArtistList artists={data.artists} />
+<ArtistList {artists} />

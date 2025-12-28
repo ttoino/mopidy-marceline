@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Playlist } from "$lib/types/mopidy";
+    import type { PlaylistRef } from "$lib/types/mopidy";
 
     import { getMopidy } from "$lib/context/mopidy";
     import { Icon } from "svelte-m3c";
@@ -9,24 +9,22 @@
     import ListItem from "./ListItem.svelte";
 
     let {
-        playlist,
+        playlist: ref,
     }: {
-        playlist: Playlist;
+        playlist: PlaylistRef;
     } = $props();
 
     const mopidy = getMopidy();
 
-    let image = $derived(mopidy.getImage(playlist.uri));
+    let playlist = $derived(mopidy.getPlaylist(ref.uri));
 
     let actions = $derived(playlistActions(mopidy, playlist));
-
-    $effect(() => {
-        mopidy.requestImages([playlist.uri]);
-    });
 </script>
 
 <ListItem {actions} lines={1}>
     {#snippet leading()}
+        {@const image = await mopidy.getMainImage(ref.uri)}
+
         {#if image}
             <img
                 class="aspect-square h-full object-cover"

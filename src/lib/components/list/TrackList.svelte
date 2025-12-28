@@ -1,11 +1,13 @@
 <script lang="ts">
-    import type { Track } from "$lib/types/mopidy";
+    import type { TrackRef } from "$lib/types/mopidy";
 
     import TrackListItem from "../item/TrackListItem.svelte";
     import VirtualList from "./VirtualList.svelte";
 
-    let { numbered = false, tracks }: { numbered?: boolean; tracks: Track[] } =
-        $props();
+    let {
+        numbered = false,
+        tracks,
+    }: { numbered?: boolean; tracks: TrackRef[] } = $props();
 </script>
 
 <VirtualList data={tracks} getKey={(track) => track.uri}>

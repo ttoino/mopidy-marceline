@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type { Directory } from "$lib/types/mopidy";
+    import type { DirectoryRef } from "$lib/types/mopidy";
 
     import DirectoryListItem from "../item/DirectoryListItem.svelte";
     import VirtualList from "./VirtualList.svelte";
 
-    let { directories }: { directories: Directory[] } = $props();
+    let { directories }: { directories: DirectoryRef[] } = $props();
 </script>
 
 <VirtualList data={directories} getKey={(directory) => directory.uri ?? ""}>

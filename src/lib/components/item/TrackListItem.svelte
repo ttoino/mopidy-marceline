@@ -1,5 +1,15 @@
+<script lang="ts" module>
+    const shapes = [
+        "mask-shape-sunny",
+        "mask-shape-6-sided-cookie",
+        "mask-shape-7-sided-cookie",
+        "mask-shape-9-sided-cookie",
+        "mask-shape-8-leaf-clover",
+    ] as const;
+</script>
+
 <script lang="ts">
-    import type { Track } from "$lib/types/mopidy";
+    import type { TrackRef } from "$lib/types/mopidy";
     import type { ComponentProps } from "svelte";
 
     import { SEPARATOR } from "$lib/constants";
@@ -13,14 +23,7 @@
     import ArtistsLinks from "../link/ArtistsLinks.svelte";
     import TrackLink from "../link/TrackLink.svelte";
     import ListItem from "./ListItem.svelte";
-
-    const shapes = [
-        "mask-shape-sunny",
-        "mask-shape-6-sided-cookie",
-        "mask-shape-7-sided-cookie",
-        "mask-shape-9-sided-cookie",
-        "mask-shape-8-leaf-clover",
-    ] as const;
+    import SkeletonListItem from "./SkeletonListItem.svelte";
 
     let {
         actions: baseActions,
@@ -30,7 +33,7 @@
         leading: baseLeading,
         maxIndex,
         maxIndexClass,
-        track,
+        track: ref,
         trailing: baseTrailing,
     }: {
         active?: boolean;
@@ -38,7 +41,7 @@
         indexClass?: string;
         maxIndex?: number;
         maxIndexClass?: string;
-        track: Track;
+        track: TrackRef;
     } & Partial<
         Pick<
             ComponentProps<typeof ListItem>,
@@ -48,45 +51,44 @@
 
     const mopidy = getMopidy();
 
-    let actions = $derived(baseActions ?? trackActions(mopidy, track));
-
     let active = $derived(
-        baseActive ?? track.uri === mopidy.currentTrack?.track.uri,
+        baseActive ?? ref.uri === mopidy.currentTrack?.track.uri,
     );
-
-    let activeShape = $derived(
-        hashToNumber(track.uri).then((n) => shapes[n % shapes.length]),
-    );
-
-    let image = $derived(mopidy.getImage(track.uri));
 </script>
 
-<ListItem
-    {actions}
-    labelTextClass={active ? "text-primary" : ""}
-    leadingClass="inline-flex flex-row items-center gap-4"
-    lines={2}
-    supportingTextClass={active ? "text-secondary" : ""}
->
-    {#snippet leading()}
-        {#if index !== undefined}
-            <span
-                class="inline-grid grid-cols-1 grid-rows-1 justify-items-end *:col-span-full *:row-span-full"
-            >
-                <span class="transition-opacity {indexClass}">{index}</span>
-                {#if maxIndex !== undefined}
-                    <span
-                        class="pointer-events-none opacity-0 {maxIndexClass}"
-                        aria-hidden="true">{maxIndex}</span
-                    >
-                {/if}
+<SkeletonListItem>
+    {@const track = await mopidy.getTrack(ref.uri)}
+    {@const actions = baseActions ?? trackActions(mopidy, track)}
 
-                {@render baseLeading?.()}
-            </span>
-        {/if}
+    <ListItem
+        {actions}
+        labelTextClass={active ? "text-primary" : ""}
+        leadingClass="inline-flex flex-row items-center gap-4"
+        lines={2}
+        supportingTextClass={active ? "text-secondary" : ""}
+    >
+        {#snippet leading()}
+            {@const image = await mopidy.getMainImage(ref.uri)}
+            {@const shape =
+                shapes[(await hashToNumber(ref.uri)) % shapes.length]}
 
-        {#if image}
-            {#snippet img(shape = "mask-shape-circle")}
+            {#if index !== undefined}
+                <span
+                    class="inline-grid grid-cols-1 grid-rows-1 justify-items-end *:col-span-full *:row-span-full"
+                >
+                    <span class="transition-opacity {indexClass}">{index}</span>
+                    {#if maxIndex !== undefined}
+                        <span
+                            class="pointer-events-none opacity-0 {maxIndexClass}"
+                            aria-hidden="true">{maxIndex}</span
+                        >
+                    {/if}
+
+                    {@render baseLeading?.()}
+                </span>
+            {/if}
+
+            {#if image}
                 <div
                     class="h-full mask-contain mask-no-repeat [animation-duration:5s] {active
                         ? shape
@@ -104,28 +106,22 @@
                         src={image}
                     />
                 </div>
-            {/snippet}
+            {:else}
+                <Icon icon="music_note" />
+            {/if}
+        {/snippet}
+        {#snippet labelText()}
+            <TrackLink contained={false} {track} />
+        {/snippet}
+        {#snippet supportingText()}
+            <ArtistsLinks artists={track.artists} />
+            {SEPARATOR}
+            <AlbumLink album={track.album} />
+        {/snippet}
+        {#snippet trailing()}
+            {@render baseTrailing?.()}
 
-            {#await activeShape}
-                {@render img()}
-            {:then shape}
-                {@render img(shape)}
-            {/await}
-        {:else}
-            <Icon icon="music_note" />
-        {/if}
-    {/snippet}
-    {#snippet labelText()}
-        <TrackLink contained={false} {track} />
-    {/snippet}
-    {#snippet supportingText()}
-        <ArtistsLinks artists={track.artists} />
-        {SEPARATOR}
-        <AlbumLink album={track.album} />
-    {/snippet}
-    {#snippet trailing()}
-        {@render baseTrailing?.()}
-
-        {formatDuration(track.length)}
-    {/snippet}
-</ListItem>
+            {formatDuration(track.length)}
+        {/snippet}
+    </ListItem>
+</SkeletonListItem>

@@ -2,8 +2,10 @@
     import Hero from "$lib/components/hero/Hero.svelte";
     import HistoryEntryList from "$lib/components/list/HistoryEntryList.svelte";
     import Title from "$lib/components/Title.svelte";
+    import { getMopidy } from "$lib/context/mopidy";
 
-    let { data } = $props();
+    const mopidy = getMopidy();
+    const history = mopidy.history;
 </script>
 
 <svelte:head>
@@ -13,8 +15,8 @@
 <Hero>
     {#snippet title()}History{/snippet}
     {#snippet subtitle()}
-        {data.history.length} entr{data.history.length === 1 ? "y" : "ies"}
+        {history.length} entr{history.length === 1 ? "y" : "ies"}
     {/snippet}
 </Hero>
 
-<HistoryEntryList entries={data.history} />
+<HistoryEntryList entries={history} />

@@ -15,25 +15,40 @@
     import TrackPreview from "./TrackPreview.svelte";
 
     const mopidy = getMopidy();
+
+    let palette = $derived(
+        mopidy.currentTrack
+            ? mopidy.getPalette(mopidy.currentTrack.track.uri)
+            : null,
+    );
 </script>
 
 <aside
-    style={mopidy.currentTrackPalette}
+    style={await palette}
     class="fixed right-0 bottom-0 left-0 z-50 flex h-20 flex-row items-center gap-8 rounded-t-lg bg-surface-container p-2 text-on-surface-variant"
     transition:slide={{ axis: "y" }}
 >
     {#if mopidy.currentTrack}
         <TrackInfo track={mopidy.currentTrack.track} />
 
+        {#snippet prev({ props })}
+            <IconButton
+                icon="skip_previous"
+                {...mergeProps(props, {
+                    onclick: () => mopidy.skipPrevious(),
+                })}
+            />
+        {/snippet}
+        {#snippet next({ props })}
+            <IconButton
+                icon="skip_next"
+                {...mergeProps(props, {
+                    onclick: () => mopidy.skipNext(),
+                })}
+            />
+        {/snippet}
+
         <StandardButtonGroup color="secondary" variant="tonal" width="narrow">
-            {#snippet prev({ props })}
-                <IconButton
-                    icon="skip_previous"
-                    {...mergeProps(props, {
-                        onclick: () => mopidy.skipPrevious(),
-                    })}
-                />
-            {/snippet}
             {#if mopidy.previousTrack}
                 <TrackPreview
                     track={mopidy.previousTrack.track}
@@ -51,14 +66,6 @@
                 variant="filled"
                 width="wide"
             />
-            {#snippet next({ props })}
-                <IconButton
-                    icon="skip_next"
-                    {...mergeProps(props, {
-                        onclick: () => mopidy.skipNext(),
-                    })}
-                />
-            {/snippet}
             {#if mopidy.nextTrack}
                 <TrackPreview track={mopidy.nextTrack.track} trigger={next} />
             {:else}

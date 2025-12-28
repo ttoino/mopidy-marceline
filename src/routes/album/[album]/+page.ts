@@ -1,3 +1,5 @@
+import type { AlbumURI } from "$lib/types/mopidy";
+
 import { error } from "@sveltejs/kit";
 import { brand } from "$lib/types/brand";
 
@@ -5,21 +7,18 @@ import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, parent }) => {
     const { mopidy } = await parent();
+    const uri: AlbumURI = brand(params.album);
 
-    const album = mopidy.getAlbum(brand(params.album));
+    try {
+        const album = await mopidy.getAlbum(uri);
 
-    if (!album) error(404, "Album not found");
+        const palette = mopidy.getPalette(uri);
 
-    const image = (
-        await mopidy.requestImages([
-            album.uri,
-            ...album.tracks.map((track) => track.uri),
-        ])
-    )?.at(0);
-    const palette = image ? await mopidy.requestPalette(image) : undefined;
-
-    return {
-        album,
-        palette,
-    };
+        return {
+            album,
+            palette,
+        };
+    } catch {
+        throw error(404, "Album not found");
+    }
 };

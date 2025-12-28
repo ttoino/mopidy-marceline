@@ -1,4 +1,4 @@
-import type { ModelRef } from "$lib/types/mopidy";
+import type { ArtistURI, ModelRef } from "$lib/types/mopidy";
 
 import { error } from "@sveltejs/kit";
 import { sortByDate } from "$lib/sort";
@@ -8,41 +8,28 @@ import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, parent }) => {
     const { mopidy } = await parent();
+    const uri: ArtistURI = brand(params.artist);
 
-    const artist = mopidy.getArtist(brand(params.artist));
+    try {
+        const artist = await mopidy.getArtist(uri);
 
-    if (!artist) error(404, "Artist not found");
+        const items = sortByDate([...artist.albums, ...artist.tracks]).map(
+            (item) =>
+                ({
+                    name: item.name,
+                    type: "album" in item ? "track" : "album",
+                    uri: item.uri,
+                }) as ModelRef,
+        );
 
-    const tracks = mopidy.tracks.filter(
-        (track) =>
-            !track.album.artists.some((a) => a.uri === artist.uri) &&
-            [
-                ...(track.artists ?? []),
-                ...(track.composers ?? []),
-                ...(track.performers ?? []),
-            ].some((a) => a.uri === artist.uri),
-    );
+        const palette = mopidy.getPalette(uri);
 
-    const items = sortByDate([...artist.albums, ...tracks]).map(
-        (item) =>
-            ({
-                name: item.name,
-                type: "album" in item ? "track" : "album",
-                uri: item.uri,
-            }) as ModelRef,
-    );
-
-    const image = (
-        await mopidy.requestImages([
-            artist.uri,
-            ...tracks.map((track) => track.uri),
-        ])
-    )?.at(0);
-    const palette = image ? await mopidy.requestPalette(image) : undefined;
-
-    return {
-        artist,
-        items,
-        palette,
-    };
+        return {
+            artist,
+            items,
+            palette,
+        };
+    } catch {
+        throw error(404, "Artist not found");
+    }
 };

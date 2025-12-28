@@ -6,23 +6,26 @@
 
     let {
         actions,
-        image,
+        image: imagePromise,
         info,
         subtitle,
         title,
     }: {
         actions?: Actions;
-        image?: string;
+        image?: Promise<null | string>;
         info?: Snippet;
         subtitle?: Snippet;
         title?: Snippet;
     } = $props();
+
+    let image = $derived(imagePromise ? await imagePromise : null);
 </script>
 
 <div class="flex flex-col items-stretch gap-8 p-4 pt-8 medium:flex-row">
     {#if image}
         <img class="h-auto w-full max-w-100 shrink-0 grow" alt="" src={image} />
     {/if}
+
     <div class="flex flex-grow flex-col items-start justify-center">
         {#if title}
             <h1 class="text-display-l">
@@ -50,6 +53,7 @@
             </div>
         {/if}
     </div>
+
     {#if !image && actions && actions.length > 0}
         <ButtonActions {actions} />
     {/if}

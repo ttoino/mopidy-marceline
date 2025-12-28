@@ -1,3 +1,5 @@
+import type { TrackURI } from "$lib/types/mopidy";
+
 import { error } from "@sveltejs/kit";
 import { brand } from "$lib/types/brand";
 
@@ -5,19 +7,18 @@ import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, parent }) => {
     const { mopidy } = await parent();
+    const uri: TrackURI = brand(params.track);
 
-    const track = mopidy.getTrack(brand(params.track));
+    try {
+        const track = await mopidy.getTrack(uri);
 
-    if (!track) error(404, "Track not found");
+        const palette = mopidy.getPalette(uri);
 
-    const lyrics = await mopidy.requestLyrics(track);
-
-    const image = (await mopidy.requestImages([track.uri]))?.at(0);
-    const palette = image ? await mopidy.requestPalette(image) : undefined;
-
-    return {
-        lyrics,
-        palette,
-        track,
-    };
+        return {
+            palette,
+            track,
+        };
+    } catch {
+        throw error(404, "Track not found");
+    }
 };

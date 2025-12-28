@@ -16,19 +16,12 @@
 
     const mopidy = getMopidy();
 
-    let image = $derived(mopidy.getImage(track.uri));
-    let palette = $derived(image ? mopidy.getPalette(image) : undefined);
-
-    $effect(() => {
-        mopidy.requestImages([track.uri]).then((images) => {
-            if (images && images[0]) mopidy.requestPalette(images[0]);
-        });
-    });
+    let palette = $derived(mopidy.getPalette(track.uri));
 </script>
 
 <!-- FIXME: palette doesn't work -->
 <Tooltip
-    style={palette}
+    style={await palette}
     class="rounded-md bg-surface-container p-2 text-on-surface-variant shadow-2"
     variant="rich"
     {...props}

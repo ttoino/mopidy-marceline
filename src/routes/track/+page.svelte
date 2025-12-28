@@ -5,22 +5,19 @@
     import Title from "$lib/components/Title.svelte";
     import { getMopidy } from "$lib/context/mopidy.js";
 
-    let { data } = $props();
-
     const mopidy = getMopidy();
-
-    let actions = $derived(tracksActions(mopidy, data.tracks));
+    const tracks = await mopidy.tracks;
 </script>
 
 <svelte:head>
     <Title text="Tracks" />
 </svelte:head>
 
-<Hero {actions}>
+<Hero actions={tracksActions(mopidy, tracks)}>
     {#snippet title()}All tracks{/snippet}
     {#snippet subtitle()}
-        {data.tracks.length} track{data.tracks.length === 1 ? "" : "s"}
+        {tracks.length} track{tracks.length === 1 ? "" : "s"}
     {/snippet}
 </Hero>
 
-<TrackList tracks={data.tracks} />
+<TrackList {tracks} />
