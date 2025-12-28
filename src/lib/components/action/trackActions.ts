@@ -1,4 +1,4 @@
-import type MopidyState from "$lib/state/mopidy.svelte";
+import type { MopidyState } from "$lib/state/mopidy.svelte";
 import type { Actions } from "$lib/types/action";
 import type { AnyTracks, Track } from "$lib/types/mopidy";
 

@@ -14,8 +14,8 @@
 </script>
 
 <Link
-    params={{ directory: directory.uri ?? "" }}
-    path="/library/[directory]"
+    params={{ directory: directory.uri ?? undefined }}
+    path="/library/[[directory]]"
     {...props}
 >
     {directory.name}

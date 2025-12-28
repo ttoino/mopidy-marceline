@@ -15,7 +15,7 @@
 
     const mopidy = getMopidy();
 
-    let image = $derived(mopidy.getImage(playlist.uri));
+    let image = $derived(mopidy.getMainImage(playlist.uri));
 
     let actions = $derived(playlistActions(mopidy, playlist));
 </script>

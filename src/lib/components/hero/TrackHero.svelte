@@ -20,7 +20,7 @@
 
     const mopidy = getMopidy();
 
-    let image = $derived(mopidy.getImage(track.uri));
+    let image = $derived(mopidy.getMainImage(track.uri));
 
     let actions = $derived(trackActions(mopidy, track));
 </script>

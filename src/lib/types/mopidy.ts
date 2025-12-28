@@ -37,7 +37,7 @@ export type ArtistRef = Override<
 export type DirectoryRef = Override<
     Mopidy.models.Ref<"directory">,
     {
-        uri: DirectoryURI;
+        uri: DirectoryURI | null;
     }
 >;
 
@@ -91,8 +91,9 @@ export type Artist = Override<
     }
 >;
 
-export type ArtistWithAlbums = {
+export type ArtistWithAlbumsAndTracks = {
     albums: Album[];
+    tracks: Track[];
 } & Artist;
 
 export type Directory = {
@@ -111,7 +112,7 @@ export type PlaybackState = Mopidy.core.PlaybackState;
 export type Playlist = Override<
     Mopidy.models.Playlist,
     {
-        tracks: Track[];
+        tracks: TrackRef[];
         uri: PlaylistURI;
     }
 >;

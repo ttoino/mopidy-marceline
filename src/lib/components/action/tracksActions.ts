@@ -1,6 +1,7 @@
-import type MopidyState from "$lib/state/mopidy.svelte";
+import type { MopidyState } from "$lib/state/mopidy.svelte";
 import type { Actions } from "$lib/types/action";
 import type { AnyTracks } from "$lib/types/mopidy";
+import type { IconName } from "svelte-m3c";
 
 export default (mopidy: MopidyState, tracks: AnyTracks): Actions => [
     {
@@ -23,7 +24,7 @@ export default (mopidy: MopidyState, tracks: AnyTracks): Actions => [
         actions: [
             ...mopidy.playlists.map((playlist) => ({
                 action: () => mopidy.addToPlaylist(playlist, tracks),
-                icon: "queue_music",
+                icon: "queue_music" as IconName,
                 label: playlist.name,
             })),
             {

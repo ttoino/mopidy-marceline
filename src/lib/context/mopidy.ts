@@ -1,4 +1,4 @@
-import type MopidyState from "$lib/state/mopidy.svelte";
+import type { MopidyState } from "$lib/state/mopidy.svelte";
 
 import { getContext, setContext } from "svelte";
 

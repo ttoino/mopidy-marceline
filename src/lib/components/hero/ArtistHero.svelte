@@ -14,7 +14,7 @@
 
     const mopidy = getMopidy();
 
-    let image = $derived(mopidy.getImage(artist.uri));
+    let image = $derived(mopidy.getMainImage(artist.uri));
 </script>
 
 <Hero {image}>

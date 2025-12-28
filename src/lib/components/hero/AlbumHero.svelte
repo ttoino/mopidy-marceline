@@ -18,7 +18,7 @@
 
     const mopidy = getMopidy();
 
-    let image = $derived(mopidy.getImage(album.uri));
+    let image = $derived(mopidy.getMainImage(album.uri));
 
     let actions = $derived(albumActions(mopidy, album));
 </script>

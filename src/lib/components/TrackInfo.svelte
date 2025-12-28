@@ -14,11 +14,7 @@
 
     const mopidy = getMopidy();
 
-    let image = $derived(mopidy.getImage(track.uri));
-
-    $effect(() => {
-        mopidy.requestImages([track.uri]);
-    });
+    let image = $derived(await mopidy.getMainImage(track.uri));
 </script>
 
 <div class="flex h-16 flex-row items-center gap-4">
