@@ -94,9 +94,7 @@ const historyState = (base: Mopidy, history: Mopidy.core.HistoryController) => {
     void update();
 
     return {
-        get history() {
-            return state;
-        },
+        history: () => state,
     };
 };
 
@@ -346,21 +344,19 @@ const mixerState = (base: Mopidy, mixer: Mopidy.core.MixerController) => {
     });
 
     return {
-        get mute() {
-            return muteState;
-        },
-        set mute(mute: boolean) {
+        mute: () => muteState,
+
+        setMute: (mute: boolean) => {
             void mixer.setMute({ mute });
             muteState = mute;
         },
 
-        get volume() {
-            return volumeState;
-        },
-        set volume(volume: number) {
+        setVolume: (volume: number) => {
             void mixer.setVolume({ volume });
             volumeState = volume;
         },
+
+        volume: () => volumeState,
     };
 };
 
@@ -439,22 +435,20 @@ const playbackState = (
     }, 10000);
 
     return {
-        get consume() {
-            return consume;
-        },
-        set consume(value) {
+        consume: () => consume,
+
+        currentTrack: () => currentTrack,
+
+        playbackState: () => playbackState,
+
+        repeat: () => repeat,
+
+        setConsume: (value: boolean) => {
             consume = value;
             void tracklist.setConsume({ value });
         },
 
-        get currentTrack() {
-            return currentTrack;
-        },
-
-        get playbackState() {
-            return playbackState;
-        },
-        set playbackState(newState: PlaybackState) {
+        setPlaybackState: (newState: PlaybackState) => {
             switch (newState) {
                 case "paused":
                     void playback.pause();
@@ -472,29 +466,29 @@ const playbackState = (
             playbackState = newState;
         },
 
-        get repeat() {
-            return repeat;
-        },
-        set repeat(value) {
+        setRepeat: (value: boolean) => {
             repeat = value;
             void tracklist.setRepeat({ value });
         },
 
-        get shuffle() {
-            return shuffle;
-        },
-        set shuffle(value) {
+        setShuffle: (value: boolean) => {
             shuffle = value;
             void tracklist.setRandom({ value });
         },
 
-        get single() {
-            return single;
-        },
-        set single(value) {
+        setSingle: (value: boolean) => {
             single = value;
             void tracklist.setSingle({ value });
         },
+
+        setTimePosition: (newTime: number) => {
+            timePosition = newTime;
+            void playback.seek({ time_position: newTime });
+        },
+
+        shuffle: () => shuffle,
+
+        single: () => single,
 
         skipNext() {
             void playback.next();
@@ -504,23 +498,15 @@ const playbackState = (
             void playback.previous();
         },
 
-        get timePosition() {
-            return timePosition;
-        },
-        set timePosition(newTime) {
-            if (newTime !== null) {
-                timePosition = newTime;
-                void playback.seek({ time_position: newTime });
-            }
-        },
+        timePosition: () => timePosition,
 
         togglePlaybackState() {
             switch (playbackState) {
                 case "paused":
-                    this.playbackState = "playing";
+                    this.setPlaybackState("playing");
                     break;
                 case "playing":
-                    this.playbackState = "paused";
+                    this.setPlaybackState("paused");
                     break;
                 case "stopped":
                     break;
@@ -546,7 +532,7 @@ const playlistsState = (
         })),
     });
 
-    void playlists.asList().then((refs) =>
+    const loaded = playlists.asList().then((refs) =>
         Promise.allSettled(
             refs.map(async (ref) => {
                 const playlist = await playlists.lookup({ uri: ref.uri });
@@ -555,7 +541,11 @@ const playlistsState = (
 
                 console.debug("Found a playlist");
 
-                return normalizePlaylist(playlist);
+                const playlistModel = normalizePlaylist(playlist);
+
+                state.set(playlistModel.uri, playlistModel);
+
+                console.debug(`There are ${state.size} playlists`);
             }),
         ),
     );
@@ -573,7 +563,9 @@ const playlistsState = (
         console.debug("A playlist changed");
     });
 
-    const getPlaylist = (uri: PlaylistURI) => {
+    const getPlaylist = async (uri: PlaylistURI) => {
+        await loaded;
+
         const playlist = state.get(uri);
 
         if (!playlist) throw new Error("Playlist not found");
@@ -587,7 +579,7 @@ const playlistsState = (
             tracks: AnyTrack | AnyTracks,
         ) => {
             const uri = typeof playlist !== "string" ? playlist.uri : playlist;
-            const pl = getPlaylist(uri);
+            const pl = await getPlaylist(uri);
 
             const newPlaylist = await playlists.save({
                 playlist: {
@@ -623,9 +615,7 @@ const playlistsState = (
 
         getPlaylist,
 
-        get playlists() {
-            return state.values().toArray();
-        },
+        playlists: () => state.values().toArray(),
     };
 };
 
@@ -668,9 +658,7 @@ const tracklistState = (
 
         clearQueue: async () => await tracklist.clear(),
 
-        get nextTrack() {
-            return nextTrack;
-        },
+        nextTrack: () => nextTrack,
 
         playNext: async (tracks: AnyTrack | AnyTracks) => {
             await tracklist.add({
@@ -688,13 +676,9 @@ const tracklistState = (
             await playback.play({});
         },
 
-        get previousTrack() {
-            return previousTrack;
-        },
+        previousTrack: () => previousTrack,
 
-        get queue() {
-            return queue;
-        },
+        queue: () => queue,
 
         removeFromQueue: async (tracks: AnyTlTrack | AnyTlTracks) =>
             await tracklist.remove({

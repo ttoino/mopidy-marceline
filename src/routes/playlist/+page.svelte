@@ -5,7 +5,7 @@
     import { getMopidy } from "$lib/context/mopidy";
 
     const mopidy = getMopidy();
-    const playlists = mopidy.playlists;
+    let playlists = $derived(mopidy.playlists());
 </script>
 
 <svelte:head>

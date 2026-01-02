@@ -51,9 +51,8 @@
 
     const mopidy = getMopidy();
 
-    let active = $derived(
-        baseActive ?? ref.uri === mopidy.currentTrack?.track.uri,
-    );
+    let currentTrack = $derived(mopidy.currentTrack());
+    let active = $derived(baseActive ?? ref.uri === currentTrack?.track.uri);
 </script>
 
 <SkeletonListItem>
@@ -93,14 +92,14 @@
                     class="h-full mask-contain mask-no-repeat [animation-duration:5s] {active
                         ? shape
                         : 'mask-shape-square'}"
-                    class:[animation-play-state:paused]={mopidy.playbackState !==
-                        "playing"}
+                    class:[animation-play-state:paused]={active &&
+                        mopidy.playbackState() !== "playing"}
                     class:animate-spin={active}
                 >
                     <img
                         class="aspect-square h-full object-cover [animation-direction:reverse] [animation-duration:5s]"
-                        class:[animation-play-state:paused]={mopidy.playbackState !==
-                            "playing"}
+                        class:[animation-play-state:paused]={active &&
+                            mopidy.playbackState() !== "playing"}
                         class:animate-spin={active}
                         alt="Album cover"
                         src={image}

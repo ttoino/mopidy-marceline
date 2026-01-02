@@ -25,8 +25,7 @@
 
     <ListItem {actions} lines={2}>
         {#snippet leading()}
-            <!-- {@const image =  await mopidy.getMainImage(ref.uri)} -->
-            {@const image = null}
+            {@const image = await mopidy.getMainImage(ref.uri)}
 
             {#if image}
                 <img

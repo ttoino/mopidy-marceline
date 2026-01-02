@@ -22,7 +22,7 @@ export default (mopidy: MopidyState, tracks: AnyTracks): Actions => [
     "divider",
     {
         actions: [
-            ...mopidy.playlists.map((playlist) => ({
+            ...mopidy.playlists().map((playlist) => ({
                 action: () => mopidy.addToPlaylist(playlist, tracks),
                 icon: "queue_music" as IconName,
                 label: playlist.name,

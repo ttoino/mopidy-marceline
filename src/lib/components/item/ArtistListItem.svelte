@@ -4,6 +4,7 @@
     import { getMopidy } from "$lib/context/mopidy";
     import { Icon } from "svelte-m3c";
 
+    import artistActions from "../action/artistActions";
     import ArtistLink from "../link/ArtistLink.svelte";
     import ListItem from "./ListItem.svelte";
     import SkeletonListItem from "./SkeletonListItem.svelte";
@@ -19,8 +20,9 @@
 
 <SkeletonListItem>
     {@const artist = await mopidy.getArtist(ref.uri)}
+    {@const actions = artistActions(mopidy, artist)}
 
-    <ListItem lines={1}>
+    <ListItem {actions} lines={1}>
         {#snippet leading()}
             {@const image = await mopidy.getMainImage(ref.uri)}
 

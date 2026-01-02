@@ -10,7 +10,7 @@ export const load: PageLoad = async ({ params, parent }) => {
     const uri: PlaylistURI = brand(params.playlist);
 
     try {
-        const playlist = mopidy.getPlaylist(brand(params.playlist));
+        const playlist = await mopidy.getPlaylist(brand(params.playlist));
 
         const palette = mopidy.getPalette(uri);
 

@@ -5,7 +5,7 @@
     import { getMopidy } from "$lib/context/mopidy";
 
     const mopidy = getMopidy();
-    const history = mopidy.history;
+    const history = $derived(mopidy.history());
 </script>
 
 <svelte:head>

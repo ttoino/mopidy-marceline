@@ -13,24 +13,26 @@
 
     let actions = $derived(queueActions(mopidy));
 
+    let queue = $derived(mopidy.queue());
+
     let selected = new SvelteSet<TlTrack>();
     let selectedActions = $derived(tlTracksActions(mopidy, [...selected]));
 
     $effect(() => {
         for (const s of selected)
-            if (!mopidy.queue.includes(s)) selected.delete(s);
+            if (!mopidy.queue().includes(s)) selected.delete(s);
     });
 </script>
 
 <svelte:head>
-    <Title text={mopidy.currentTrack?.track.name ?? "Queue"} />
+    <Title text={mopidy.currentTrack()?.track.name ?? "Queue"} />
 </svelte:head>
 
 <Hero actions={selected.size == 0 ? actions : selectedActions}>
     {#snippet title()}Queue{/snippet}
     {#snippet subtitle()}
-        {selected.size || mopidy.queue.length}
-        track{(selected.size || mopidy.queue.length) === 1 ? "" : "s"}
+        {selected.size || queue.length}
+        track{(selected.size || queue.length) === 1 ? "" : "s"}
         {selected.size > 0 ? "selected" : ""}
     {/snippet}
 </Hero>
@@ -48,4 +50,4 @@
     <ButtonActions actions={selected.size == 0 ? actions : selectedActions} />
 </div> -->
 
-<TlTrackList tracks={mopidy.queue} bind:selected />
+<TlTrackList tracks={queue} bind:selected />

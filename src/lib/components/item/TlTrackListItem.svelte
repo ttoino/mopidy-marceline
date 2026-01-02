@@ -25,7 +25,8 @@
 
     let actions = $derived(tlTrackActions(mopidy, track));
 
-    let active = $derived(track.tlid === mopidy.currentTrack?.tlid);
+    let currentTrack = $derived(mopidy.currentTrack());
+    let active = $derived(track.tlid === currentTrack?.tlid);
 </script>
 
 <TrackListItem

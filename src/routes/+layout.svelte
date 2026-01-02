@@ -16,6 +16,11 @@
     setScroll(() => scrollRef);
 
     setMopidy(data.mopidy);
+
+    let currentTrack = $derived(data.mopidy.currentTrack());
+    let currentTrackPalette = $derived(
+        currentTrack ? data.mopidy.getPalette(currentTrack.track.uri) : null,
+    );
 </script>
 
 <svelte:boundary>
@@ -36,9 +41,7 @@
     {/snippet} -->
 
     {@const palette =
-        (await page.data.palette) ??
-        (await data.mopidy.currentTrackPalette) ??
-        ""}
+        (await page.data.palette) ?? (await currentTrackPalette) ?? ""}
 
     <Provider>
         <div
